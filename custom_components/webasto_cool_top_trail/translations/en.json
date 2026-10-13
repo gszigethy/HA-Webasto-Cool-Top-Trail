@@ -1,0 +1,30 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Webasto Cool Top Trail",
+        "description": "Create a development scaffold. IR decoding, ESP32 connectivity, and air conditioner controls are not implemented yet. Only a protocol status diagnostic sensor will be created.",
+        "data": {
+          "name": "Name"
+        }
+      }
+    },
+    "error": {
+      "invalid_name": "Enter a non-empty name."
+    },
+    "abort": {
+      "already_configured": "An entry with this name already exists."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "protocol_status": {
+        "name": "Protocol status",
+        "state": {
+          "awaiting_protocol": "Awaiting protocol implementation"
+        }
+      }
+    }
+  }
+}
+
