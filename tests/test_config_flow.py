@@ -119,3 +119,28 @@ async def test_reject_action_with_wrong_parameters(hass, transport):
         data={**DATA, "send_service": "esphome.wrong_send_frame"},
     )
     assert result["errors"] == {"send_service": "invalid_service"}
+
+
+async def test_rebinding_releases_old_receiver_identity(hass, transport):
+    entry = MockConfigEntry(
+        domain=DOMAIN, data=DATA, unique_id=DATA["receiver_entity"], version=2
+    )
+    entry.add_to_hass(hass)
+    hass.states.async_set("sensor.new_frame", "unknown")
+    with patch(
+        f"custom_components.{DOMAIN}.async_setup_entry",
+        new=AsyncMock(return_value=True),
+    ):
+        result = await hass.config_entries.flow.async_init(
+            DOMAIN,
+            context={"source": SOURCE_RECONFIGURE, "entry_id": entry.entry_id},
+            data={**DATA, "receiver_entity": "sensor.new_frame"},
+        )
+        await hass.async_block_till_done()
+        assert result["reason"] == "reconfigure_successful"
+        assert entry.unique_id == "sensor.new_frame"
+        result = await hass.config_entries.flow.async_init(
+            DOMAIN, context={"source": SOURCE_USER}, data=DATA
+        )
+        await hass.async_block_till_done()
+    assert result["type"] is FlowResultType.CREATE_ENTRY

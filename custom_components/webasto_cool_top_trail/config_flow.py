@@ -105,7 +105,10 @@ class WebastoConfigFlow(ConfigFlow, domain=DOMAIN):
             else:
                 if entry:
                     return self.async_update_reload_and_abort(
-                        entry, title=data[CONF_NAME], data=data
+                        entry,
+                        unique_id=data[CONF_RECEIVER],
+                        title=data[CONF_NAME],
+                        data=data,
                     )
                 await self.async_set_unique_id(data[CONF_RECEIVER])
                 self._abort_if_unique_id_configured()
