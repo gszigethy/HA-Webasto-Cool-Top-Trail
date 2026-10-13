@@ -8,6 +8,7 @@ It is not a streaming receiver or a production command encoder.
 import argparse
 import json
 from collections.abc import Sequence
+from datetime import time
 from pathlib import Path
 
 DEFAULT_CORPUS = Path(__file__).resolve().parents[1] / "captures/baseline/packets.json"
@@ -101,6 +102,62 @@ def from_bcd(value: int) -> int:
     if not 0 <= value <= 255 or value >> 4 > 9 or value & 0xF > 9:
         raise ValueError("Invalid BCD value")
     return (value >> 4) * 10 + (value & 0xF)
+
+
+def construct_climate_payload(
+    template: bytes,
+    *,
+    hvac_mode: str,
+    target_temperature_c: int,
+    clock: time,
+) -> bytes:
+    """Construct a complete packet for locally corroborated heat/cool/off modes.
+
+    Preserve auxiliary, reserved, unit, and counter fields from a validated
+    complete state. This research builder is not connected to any transmitter.
+    Fahrenheit templates require additional temperature handling and are rejected.
+    """
+    validate_payload(template)
+    if not template[7] & 0x08 or template[11] != 0:
+        raise ValueError("Only the locally validated Celsius-only profile is supported")
+    if hvac_mode not in ("heat", "cool", "off"):
+        raise ValueError("Only heat, cool, and off have local baseline evidence")
+    if type(target_temperature_c) is not int or not 16 <= target_temperature_c <= 30:
+        raise ValueError("The baseline supports integer setpoints from 16 to 30 C")
+
+    def bcd(value: int) -> int:
+        return ((value // 10) << 4) | (value % 10)
+
+    result = bytearray(template)
+    if hvac_mode != "off":
+        mode = 0x8 if hvac_mode == "heat" else 0x2
+        result[1] = (result[1] & 0xF0) | mode
+    result[10] = (result[10] & 0xF0) | (0x0C if hvac_mode == "off" else 0x08)
+    result[6] = bcd(target_temperature_c)
+    result[2], result[3], result[14] = map(
+        bcd, (clock.minute, clock.hour, clock.second)
+    )
+    for start in (0, 8):
+        index = start + 7
+        result[index] = (checksum(bytes(result[start : start + 8])) << 4) | (
+            result[index] & 0xF
+        )
+    return bytes(result)
+
+
+def encode_pulses(payload: bytes) -> list[int]:
+    """Encode a validated complete state using the cited nominal wire timings."""
+    validate_payload(payload)
+    pulses = []
+    for start, header in ((0, (4600, -2600)), (8, (9300, -5000))):
+        pulses.extend(header)
+        for byte in payload[start : start + 8]:
+            for bit in range(8):
+                pulses.extend((340, -1000 if byte & (1 << bit) else -400))
+        pulses.extend((340, -20600, 4600))
+        if start == 0:
+            pulses.append(-6700)
+    return pulses
 
 
 def interpret_payload(payload: bytes) -> dict:

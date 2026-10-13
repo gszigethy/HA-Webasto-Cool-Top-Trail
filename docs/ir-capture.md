@@ -37,6 +37,19 @@ comes after frame structure and command semantics have been established.
 
 ## Preserve raw evidence
 
+For serial capture with the supplied capture firmware:
+
+```bash
+.venv-esphome/bin/python scripts/capture_ir_serial.py \
+  --port /dev/ttyUSB0 --output /tmp/webasto-ir-session.jsonl \
+  --label-file /tmp/webasto-ir-label.txt
+```
+
+The output path is an example; device access must be available to the process.
+Write the current step name into the label file before each press. The collector
+preserves wrapped raw log lines, timestamps, complete pulse arrays, and any
+decode errors. Add session metadata before committing selected captures.
+
 Use an isolated session directory under `captures/`, for example
 `captures/<model>/<session-id>/`. Keep raw text logs or JSON in the format
 produced by the actual firmware. Add a `session.json` with the environment above
