@@ -2,6 +2,9 @@
 
 ## Unreleased - Protocol research
 
+- Validate and archive the first live ON/OFF pair at cool/auto/22 C; confirm that
+  OFF retains mode/fan/setpoint and uses a separate power flag.
+
 - Archive sanitized user-provided ESPHome YAML and review its control behavior.
 - Preserve 31 distinct IR arrays and identify their CARRIER_AC128 wire format.
 - Document the byte map, timing variation, full-state construction, checksums,

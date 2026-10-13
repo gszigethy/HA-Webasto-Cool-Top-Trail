@@ -1,0 +1,22 @@
+{
+  "created_at": "2026-10-13T14:26:26.921173+00:00",
+  "source_kind": "live ESPHome receiver session",
+  "chip": "ESP32-PICO-D4 revision 1.0",
+  "flash_size_bytes": 4194304,
+  "firmware": "ESPHome 2026.9.1 / ESP-IDF 5.5.5, capture-only",
+  "firmware_sha256": "d643cb2330daacd2ecfe9647b20dedfbd29e3f2e1790916de3a30a69fe51615e",
+  "configuration_sha256": "5f644bf3fd1444aa4a1dcbb6e46f9346825a5d7e22b7d1f9e256a90e2de78d4e",
+  "receiver_gpio": 32,
+  "receiver_inverted": true,
+  "transmitter_gpio": 26,
+  "baud_rate": 115200,
+  "receiver_idle_us": 30000,
+  "receiver_filter_us": 50,
+  "transmit_actions": false,
+  "boot_verification": "setup finished successfully; GPIO32 receiver and GPIO26 transmitter logged",
+  "optical_signal_verification": "Two complete 267-duration frames decoded; both checksums passed in each.",
+  "ac_model": "Webasto Cool Top Trail, exact variant not yet confirmed",
+  "remote_model": "not yet confirmed",
+  "capture_window": "2026-10-13T14:34:57Z to 2026-10-13T14:35:11Z",
+  "command_semantics": "Observed remote commands; no appliance feedback or emitted test commands."
+}
