@@ -187,3 +187,15 @@ See [the decoded baseline table](baseline-decoded.md) for every imported command
 The script handles this complete 267-duration capture layout. A streaming log
 collector will additionally need to assemble wrapped log lines and handle
 trailing silence, noise, repeats, partial frames, and receiver-specific variation.
+
+`construct_climate_payload` is a research builder for the locally corroborated
+Celsius heat/cool/off profile. Starting from a complete heat-16 packet, it can
+reconstruct every one of the 31 baseline payloads by changing mode, setpoint,
+and clock and recalculating both checksums. `encode_pulses` produces a complete
+nominal waveform that decodes back to those payloads. Auxiliary bytes are
+preserved. Fahrenheit and additional modes are explicitly outside this builder's
+current validation boundary. No generated command has been sent to an appliance.
+
+`scripts/capture_ir_serial.py` assembles wrapped ESPHome raw log lines into
+timestamped JSONL records, preserving short/noisy frames even when decoding
+fails. The collector uses inactive serial modem lines and emits no IR commands.

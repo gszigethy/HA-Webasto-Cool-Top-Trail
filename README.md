@@ -23,6 +23,8 @@ Implemented:
 - A timing-tolerant research decoder: all arrays match `CARRIER_AC128` and pass
   both checksums. This research tool is separate from the integration runtime.
 - A protocol specification with byte maps, timing ranges, and evidence confidence.
+- A research full-state builder that reconstructs all 31 baseline payloads and
+  a serial collector for timestamped, wrapped ESPHome IR logs.
 - Tests for configuration, device/entity registration, reload, and unload.
 - GitHub Actions for lint, formatting, tests, hassfest, and HACS validation.
 

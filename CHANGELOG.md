@@ -7,6 +7,8 @@
 - Document the byte map, timing variation, full-state construction, checksums,
   source revisions, and which features remain unverified on the Webasto unit.
 - Add a timing-tolerant research decoder and capture-backed regression tests.
+- Reconstruct all baseline payloads from complete state and nominal IR timing;
+  add a serial raw-log collector with wrapped-line and malformed-frame tests.
 - Add GPIO32 RX / GPIO26 TX capture firmware and ESPHome config validation CI.
 
 ## 0.0.1 - Development scaffold
