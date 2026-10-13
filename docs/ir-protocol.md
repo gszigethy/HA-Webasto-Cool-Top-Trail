@@ -4,6 +4,11 @@ Status: **the supplied pulse corpus matches `CARRIER_AC128`**. This identifies
 the wire format; it does not yet prove every feature on the specific Webasto
 unit. All 31 baseline packets decode to 16 bytes and pass both checksums.
 
+The first [live ON/OFF pair](../captures/live/2026-10-13-on-off/README.md) also
+matches: the user confirmed 22 C, cooling, auto fan, followed by a second power
+button press. Both packets pass both checksums. OFF retains cool/auto/22 and
+changes the separate power flag, clock seconds, and second checksum.
+
 ## Evidence and provenance
 
 - Local evidence: [sanitized ESPHome baseline](../esp32/baseline.yaml), supplied
