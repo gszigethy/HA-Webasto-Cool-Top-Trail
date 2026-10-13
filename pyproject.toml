@@ -1,0 +1,18 @@
+[project]
+name = "ha-webasto-cool-top-trail"
+version = "0.0.1"
+description = "Home Assistant integration scaffold for Webasto Cool Top Trail air conditioners"
+requires-python = ">=3.14.2"
+
+[tool.ruff]
+target-version = "py314"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "ASYNC"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+addopts = "--strict-markers --strict-config --disable-socket --allow-unix-socket"

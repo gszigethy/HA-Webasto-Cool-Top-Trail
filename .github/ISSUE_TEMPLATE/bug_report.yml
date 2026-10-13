@@ -1,0 +1,30 @@
+name: Bug report
+description: Report a reproducible integration or protocol problem.
+body:
+  - type: markdown
+    attributes:
+      value: The initial scaffold has no AC controls. Include captures for protocol problems.
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: Home Assistant, integration, and ESP32 firmware versions.
+    validations:
+      required: true
+  - type: input
+    id: hardware
+    attributes:
+      label: Hardware
+      description: Exact AC model, remote model, ESP32 board, and receiver/transmitter.
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps, expected result, and actual result
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Logs and captures
+      description: Remove credentials and unrelated identifying information before attaching evidence.
+

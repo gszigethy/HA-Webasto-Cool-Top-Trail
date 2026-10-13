@@ -1,0 +1,29 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Webasto Cool Top Trail",
+        "description": "Fejlesztési alap létrehozása. Az infravörös dekódolás, az ESP32-kapcsolat és a légkondicionáló vezérlése még nincs megvalósítva. Csak egy protokollállapotot jelző diagnosztikai érzékelő jön létre.",
+        "data": {
+          "name": "Név"
+        }
+      }
+    },
+    "error": {
+      "invalid_name": "Adjon meg egy nem üres nevet."
+    },
+    "abort": {
+      "already_configured": "Már létezik ilyen nevű bejegyzés."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "protocol_status": {
+        "name": "Protokollállapot",
+        "state": {
+          "awaiting_protocol": "A protokoll megvalósítására vár"
+        }
+      }
+    }
+  }
+}
