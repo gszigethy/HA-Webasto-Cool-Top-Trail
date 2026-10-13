@@ -2,6 +2,9 @@
 
 ## Unreleased - Protocol research
 
+- Archive button-by-button MVP captures for all modes, fan settings, temperature,
+  and C/F switching; correct the unconfirmed byte-7 unit-bit interpretation.
+
 - Validate and archive the first live ON/OFF pair at cool/auto/22 C; confirm that
   OFF retains mode/fan/setpoint and uses a separate power flag.
 

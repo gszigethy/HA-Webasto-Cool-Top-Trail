@@ -29,7 +29,7 @@ async def test_baseline_fields(command: dict) -> None:
     if command["target_temperature_c"] is not None:
         assert state["target_temperature_c"] == command["target_temperature_c"]
     assert state["fan_mode"] == "auto"
-    assert state["celsius_display"] is True
+    assert state["unknown_byte7_bit3"] is True
     assert state["timer_on_enabled"] is False
     assert state["timer_off_enabled"] is False
 

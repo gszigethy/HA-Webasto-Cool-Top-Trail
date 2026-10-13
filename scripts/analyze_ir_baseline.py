@@ -180,7 +180,7 @@ def interpret_payload(payload: bytes) -> dict:
         "clock": ":".join(f"{from_bcd(payload[index]):02}" for index in (3, 2, 14)),
         "power_flags": power_flags,
         "counter_nibble": payload[10] >> 4,
-        "celsius_display": bool(payload[7] & 0x8),
+        "unknown_byte7_bit3": bool(payload[7] & 0x8),
         "sleep": bool(payload[7] & 0x2),
         "eco": bool(payload[12] & 0x4),
         "lock": bool(payload[13] & 0x80),
