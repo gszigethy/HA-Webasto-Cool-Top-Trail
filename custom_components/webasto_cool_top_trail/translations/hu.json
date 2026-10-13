@@ -3,25 +3,72 @@
     "step": {
       "user": {
         "title": "Webasto Cool Top Trail",
-        "description": "Fejlesztési alap létrehozása. Az infravörös dekódolás, az ESP32-kapcsolat és a légkondicionáló vezérlése még nincs megvalósítva. Csak egy protokollállapotot jelző diagnosztikai érzékelő jön létre.",
+        "description": "Válassza ki az ESPHome híd vett IR keret érzékelőjét és send_frame műveletét. Először párosítsa a hidat a beépített ESPHome integrációval. A vezérlés érvényes távirányító keret vétele után válik elérhetővé. Csak adóval használva válassza az alapbeállításokat. Az IR nem ad visszajelzést a klíma működéséről.",
         "data": {
-          "name": "Név"
+          "name": "Név",
+          "receiver_entity": "ESPHome vett IR keret érzékelő",
+          "send_service": "ESPHome send_frame művelet",
+          "temperature_sensor": "Szobahőmérséklet érzékelő (opcionális)",
+          "use_default_state": "Indítás alapbeállításokkal távirányító keret betanítása nélkül"
+        }
+      },
+      "reconfigure": {
+        "title": "Webasto Cool Top Trail",
+        "description": "Válassza ki az ESPHome híd vett IR keret érzékelőjét és send_frame műveletét. Először párosítsa a hidat a beépített ESPHome integrációval. A vezérlés érvényes távirányító keret vétele után válik elérhetővé. Csak adóval használva válassza az alapbeállításokat. Az IR nem ad visszajelzést a klíma működéséről.",
+        "data": {
+          "name": "Név",
+          "receiver_entity": "ESPHome vett IR keret érzékelő",
+          "send_service": "ESPHome send_frame művelet",
+          "temperature_sensor": "Szobahőmérséklet érzékelő (opcionális)",
+          "use_default_state": "Indítás alapbeállításokkal távirányító keret betanítása nélkül"
         }
       }
     },
     "error": {
-      "invalid_name": "Adjon meg egy nem üres nevet."
+      "invalid_name": "Adjon meg egy nem üres nevet.",
+      "invalid_service": "Válasszon regisztrált ESPHome send_frame műveletet.",
+      "invalid_receiver": "Válasszon létező ESPHome vett keret érzékelőt."
     },
     "abort": {
-      "already_configured": "Már létezik ilyen nevű bejegyzés."
+      "already_configured": "Ez a vevő már hozzá van rendelve egy integrációhoz.",
+      "reconfigure_successful": "A híd beállításai frissítve."
     }
   },
   "entity": {
+    "switch": {
+      "display": {
+        "name": "Panel kijelző"
+      },
+      "panel_lock": {
+        "name": "Panel vezérlés zárolása"
+      },
+      "timer_on": {
+        "name": "Bekapcsolási időzítő"
+      },
+      "timer_off": {
+        "name": "Kikapcsolási időzítő"
+      }
+    },
+    "time": {
+      "on_time": {
+        "name": "Bekapcsolási idő"
+      },
+      "off_time": {
+        "name": "Kikapcsolási idő"
+      }
+    },
+    "button": {
+      "sync_clock": {
+        "name": "Óra szinkronizálása"
+      }
+    },
     "sensor": {
       "protocol_status": {
-        "name": "Protokollállapot",
+        "name": "Protokoll állapot",
         "state": {
-          "awaiting_protocol": "A protokoll megvalósítására vár"
+          "awaiting_frame": "Távirányító keretre vár",
+          "ready": "Kész",
+          "disconnected": "A híd nem kapcsolódik"
         }
       }
     }

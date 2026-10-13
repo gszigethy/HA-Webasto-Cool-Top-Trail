@@ -20,12 +20,13 @@ and licensing. Describe unconfirmed field meanings as hypotheses.
 
 Keep protocol parsing independent from Home Assistant and bridge networking.
 Do not guess climate features or report commanded settings as actual telemetry.
-No climate control entity is shipped until its capabilities and command path
-are implemented and verified.
+Climate capabilities must have labelled capture evidence and software tests;
+physical appliance claims additionally require recorded acceptance tests.
 
 ## Releases
 
-No release is published for the initial scaffold. HACS can download `main`.
+No release is published yet. HACS can download the development implementation
+from `main`.
 For a future release:
 
 1. Update `manifest.json` and `pyproject.toml` to the same version.

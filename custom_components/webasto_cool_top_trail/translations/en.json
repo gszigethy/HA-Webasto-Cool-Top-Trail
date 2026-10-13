@@ -3,25 +3,72 @@
     "step": {
       "user": {
         "title": "Webasto Cool Top Trail",
-        "description": "Create a development scaffold. IR decoding, ESP32 connectivity, and air conditioner controls are not implemented yet. Only a protocol status diagnostic sensor will be created.",
+        "description": "Pair the bridge using the built-in ESPHome integration first. Select its Received IR frame sensor and send_frame action. Controls wait for a valid remote frame. For a transmitter without a receiver, you may opt into default starting settings: off, cool, 24 °C, auto fan, display on, unlocked, Sleep and timers off. The first explicit command applies that complete profile. IR provides no appliance feedback; room temperature is optional.",
         "data": {
-          "name": "Name"
+          "name": "Name",
+          "receiver_entity": "ESPHome received IR frame sensor",
+          "send_service": "ESPHome send_frame action",
+          "temperature_sensor": "Room temperature sensor (optional)",
+          "use_default_state": "Use default starting settings (transmitter only)"
+        }
+      },
+      "reconfigure": {
+        "title": "Webasto Cool Top Trail",
+        "description": "Pair the bridge using the built-in ESPHome integration first. Select its Received IR frame sensor and send_frame action. Controls wait for a valid remote frame. For a transmitter without a receiver, you may opt into default starting settings: off, cool, 24 °C, auto fan, display on, unlocked, Sleep and timers off. The first explicit command applies that complete profile. IR provides no appliance feedback; room temperature is optional.",
+        "data": {
+          "name": "Name",
+          "receiver_entity": "ESPHome received IR frame sensor",
+          "send_service": "ESPHome send_frame action",
+          "temperature_sensor": "Room temperature sensor (optional)",
+          "use_default_state": "Use default starting settings (transmitter only)"
         }
       }
     },
     "error": {
-      "invalid_name": "Enter a non-empty name."
+      "invalid_name": "Enter a non-empty name.",
+      "invalid_service": "Select a registered esphome send_frame action.",
+      "invalid_receiver": "Select an existing ESPHome received-frame sensor."
     },
     "abort": {
-      "already_configured": "An entry with this name already exists."
+      "already_configured": "This receiver already has an integration entry.",
+      "reconfigure_successful": "Bridge configuration updated."
     }
   },
   "entity": {
+    "switch": {
+      "display": {
+        "name": "Panel display"
+      },
+      "panel_lock": {
+        "name": "Panel control lock"
+      },
+      "timer_on": {
+        "name": "On timer"
+      },
+      "timer_off": {
+        "name": "Off timer"
+      }
+    },
+    "time": {
+      "on_time": {
+        "name": "On time"
+      },
+      "off_time": {
+        "name": "Off time"
+      }
+    },
+    "button": {
+      "sync_clock": {
+        "name": "Synchronize clock"
+      }
+    },
     "sensor": {
       "protocol_status": {
         "name": "Protocol status",
         "state": {
-          "awaiting_protocol": "Awaiting protocol implementation"
+          "awaiting_frame": "Awaiting remote frame",
+          "ready": "Ready",
+          "disconnected": "Bridge disconnected"
         }
       }
     }

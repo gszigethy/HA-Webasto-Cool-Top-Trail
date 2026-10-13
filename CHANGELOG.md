@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.1.0 — development implementation
+
+- Implement HACS climate, auxiliary switches/time entities, clock button and
+  readiness diagnostics over ESPHome native API.
+- Add conservative full-state codec preserving unknown and untouched fields.
+- Add complete ESPHome bridge with validated RX/TX, API status responses and
+  optional transmitter-only starting settings.
+- Add lifecycle, service, concurrency, persistence, invalid-input and C++ capture
+  replay tests; compile the bridge in CI.
+- Document setup, entities, functional/technical design, protocol evidence and
+  physical acceptance boundaries. No live HA writes or firmware deployment.
+- Fahrenheit-profile target writes remain blocked pending further measurements.
+
+
 ## Unreleased - Protocol research
 
 - Archive button-by-button MVP captures for all modes, fan settings, temperature,

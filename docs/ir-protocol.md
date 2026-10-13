@@ -1,8 +1,10 @@
-# Webasto / Houghton IR protocol research
+# Webasto / Houghton CARRIER_AC128 protocol
 
-Status: **the supplied pulse corpus matches `CARRIER_AC128`**. This identifies
-the wire format; it does not yet prove every feature on the specific Webasto
-unit. All 31 baseline packets decode to 16 bytes and pass both checksums.
+Status: **baseline and controlled live captures identify `CARRIER_AC128`**.
+The production HA/ESPHome implementation constructs complete frames from these
+findings. All 31 baseline packets decode to 16 bytes and pass both checksums;
+live MVP and auxiliary captures extend the field evidence. Synthesized commands
+have not yet been physically tested against the AC. See [validation](validation.md).
 
 The first [live ON/OFF pair](../captures/live/2026-10-13-on-off/README.md) also
 matches: the user confirmed 22 C, cooling, auto fan, followed by a second power
@@ -88,32 +90,32 @@ ESPHome protocol matching; the Python research decoder has its own checks.
 ## Byte map and confidence
 
 Offsets below are **zero-based**; bits use bit 7 as MSB and bit 0 as LSB.
-`Observed` means corroborated in this baseline. `Reference only` means the
-published Houghton map supplies the semantics, but the feature has not varied
-in our local corpus.
+`Observed` means corroborated by the baseline or labelled live remote captures.
+`Reference only` means no local button/field variation has confirmed the meaning.
+All observations concern transmitted remote settings, not appliance feedback.
 
 | Offset | Meaning / mask | Local evidence |
 | --- | --- | --- |
 | 0 | Header `0x16` | Observed in all packets |
-| 1 | High nibble fan; low nibble mode | Heat `0x18`, cool `0x12`; fan always reference-auto |
+| 1 | High nibble fan; low nibble mode | All five mode codes and four fan codes locally corroborated |
 | 2 | BCD clock minutes | Sequence agrees with the reference map |
-| 3 | BCD clock hour | `09` for heat/cool captures; `10` for off |
-| 4 | Timer-on hour BCD in `0x7F`; enable `0x80` | Constant `0x10`; timer semantics reference only |
-| 5 | Timer-off hour BCD in `0x7F`; enable `0x80` | Constant `0x10`; reference only |
+| 3 | BCD clock hour | BCD hour corroborated by changing remote clock; baseline `09`/`10` |
+| 4 | Timer-on hour BCD in `0x7F`; enable `0x80` | ON hour `09`; enable `0x89` vs disabled `0x09` |
+| 5 | Timer-off hour BCD in `0x7F`; enable `0x80` | OFF hour `10`; enable `0x90` vs disabled `0x10` |
 | 6 | BCD Celsius setpoint | Every labelled heat/cool value 16-30 matches |
-| 7 | Checksum in high nibble; unknown `0x08`, sleep `0x02` | Baseline low nibble `0x08`; live Celsius and Fahrenheit packets also use `0x00`, contradicting the published unit-bit interpretation |
-| 8 | BCD timer-on minutes | Constant zero; reference only |
-| 9 | BCD timer-off minutes | Constant zero; reference only |
+| 7 | Checksum in high nibble; unknown `0x08`, sleep `0x02` | Sleep `0x02` toggled locally; `0x08` unknown: Celsius and Fahrenheit both also use `0x00` |
+| 8 | BCD timer-on minutes | Independently edited `00 → 01 → 00` |
+| 9 | BCD timer-off minutes | Independently edited `00 → 01 → 00` |
 | 10 | Counter high nibble; power low nibble | On `0x08`, off `0x0C`; counter always zero |
-| 11 | BCD Fahrenheit setpoint | Constant zero; reference only |
+| 11 | BCD Fahrenheit setpoint / profile indicator | Local 24 °C / 76 °F switch: `00 ↔ 76`; other temperatures untested |
 | 12 | Eco flag `0x04` | Constant zero; reference only; Webasto capability unproven |
-| 13 | Lock `0x80`; display disabled `0x40` | Constant zero; reference only |
+| 13 | Panel touch-control lock `0x80`; display disabled `0x40` | Each bit independently toggled in live captures |
 | 14 | BCD clock seconds | Sequence agrees with the reference map |
 | 15 | Second checksum high nibble; low nibble reserved | Checksum verified; low nibble always zero |
 
-Reference fan high-nibble values: `1=auto`, `2=high`, `4=medium`, `8=low`.
-Reference mode low-nibble values: `1=dry`, `2=cool`, `4=fan_only`, `8=heat`,
-`A=heat_cool`. Only heat/cool/off have local labelled examples.
+Corroborated fan high-nibble values: `1=auto`, `2=high`, `4=medium`, `8=low`.
+Corroborated mode low-nibble values: `1=dry`, `2=cool`, `4=fan_only`, `8=heat`,
+`A=heat_cool`. Power is separate from the retained mode nibble.
 
 The reference also reports an alternate on power nibble `0x0`. It is absent
 from this corpus. Counter behavior and accepting zero counters still require
@@ -163,23 +165,21 @@ the power flags. The local off sample demonstrates heat and 22 C retained.
 Changing setpoint must not unexpectedly reset display, lock, sleep, timers, or
 unit selection. Serialize/coalesce rapid requests into coherent full packets.
 
-The existing reference component currently builds Fahrenheit-display packets,
-clears timers, and resets lock/display settings on transmit. We should reuse
-the protocol knowledge while checking those policy choices against this project
-and the Webasto model. A native ESPHome climate also enters Home Assistant via
-its built-in ESPHome integration; agree the HACS integration boundary before
-creating duplicate climate entities.
+The existing reference component builds Fahrenheit-display packets, clears
+timers and resets lock/display settings on transmit. Our implementation preserves
+those settings instead. HACS owns the climate entity; ESPHome carries validated
+full frames through native API, so there is no duplicate climate controller.
+See [technical design](technical-design.md) for mutation rules and transport.
 
-## Remaining controlled captures
+## Remaining evidence gaps
 
-Capture repeated unchanged commands; each fan speed; dry/fan/auto modes; sleep;
-display; lock; Celsius/Fahrenheit; distinct timer-on/off times and enables;
-power off/on retaining different modes; clock changes; and rapid consecutive
-presses. Record the complete remote display before/after each operation.
-
-Test limits from the Webasto manual rather than assuming all Houghton features
-are available. No actual room temperature or compressor action is established
-by this command stream.
+MVP modes/fans/power and auxiliary flags/timers are now locally corroborated.
+Further work: Fahrenheit setpoint mapping across the range, unknown byte 7 bit 3,
+counter behavior, additional remote/model variants, exact clock-edit send trigger,
+and optical/appliance acceptance of synthesized commands. Repeated rapid commands
+and distinct higher timer digits would broaden the timing/BCD evidence.
+See [validation](validation.md). No measured room temperature, compressor action,
+or appliance acknowledgment is established by this command stream.
 
 ## Reproduce the analysis
 
@@ -220,3 +220,14 @@ editing; no complete IR packet was observed for navigation alone. Value edits
 produced full-state packets, but the exact send trigger is not yet isolated.
 These newer captures supersede the baseline-only evidence column above for
 auxiliary fields. Air-conditioner responses are not yet physically verified.
+
+## Production implementation
+
+`custom_components/webasto_cool_top_trail/protocol.py` supplies validated full-state
+mutations for all corroborated modes, fans and auxiliaries. It preserves unknown
+bits/counter and rejects unsupported Fahrenheit target edits. The earlier
+research builder above remains intentionally limited to its baseline profile.
+`esp32/webasto_ir.h` implements the same wire codec for ESPHome RX/TX, tested with
+all archived waveforms. `bridge.example.yaml` exposes native frame actions and
+sensors; it never emits commands on boot. [Entity reference](entity-map.md),
+[FD](functional-design.md) and [TD](technical-design.md) describe runtime policies.

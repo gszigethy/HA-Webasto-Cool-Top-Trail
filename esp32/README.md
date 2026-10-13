@@ -22,3 +22,15 @@ verified complete-state commands for the full climate interface.
 
 Keep secrets in local ESPHome `secrets.yaml`; do not commit credentials or the
 caravan's private network settings. Use documented placeholders in shared YAML.
+
+## Implemented full-frame bridge
+
+[bridge.example.yaml](bridge.example.yaml) and [webasto_ir.h](webasto_ir.h) now
+provide the production transport for the HACS integration. The firmware exposes
+Received IR frame and Transmitted IR frame diagnostics plus a validated native
+send_frame action with a success/error response. HA owns climate and auxiliaries;
+there is no competing native ESPHome climate entity. See the
+[installation guide](../docs/installation.md) for merging into the caravan ESP,
+transmitter-only use, pins, secrets and pairing. The bridge was compiled locally
+but has not been flashed by repository implementation work. The capture-only
+firmware remains a separate research tool.

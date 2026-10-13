@@ -1,7 +1,7 @@
 [project]
 name = "ha-webasto-cool-top-trail"
-version = "0.0.1"
-description = "Home Assistant integration scaffold for Webasto Cool Top Trail air conditioners"
+version = "0.1.0"
+description = "Home Assistant climate integration for Webasto Cool Top Trail via ESPHome IR"
 requires-python = ">=3.14.2"
 
 [tool.ruff]
