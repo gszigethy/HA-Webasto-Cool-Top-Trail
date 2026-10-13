@@ -78,6 +78,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--port", required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--raw-log", type=Path, help="Also preserve original serial bytes"
+    )
     parser.add_argument("--label", default="unlabelled")
     parser.add_argument("--label-file", type=Path)
     parser.add_argument(
@@ -85,6 +88,8 @@ def main() -> None:
     )
     args = parser.parse_args()
     args.output.parent.mkdir(parents=True, exist_ok=True)
+    if args.raw_log:
+        args.raw_log.parent.mkdir(parents=True, exist_ok=True)
 
     port = serial.Serial(port=None, baudrate=115200, timeout=0.1)
     port.dtr = False
@@ -113,6 +118,9 @@ def main() -> None:
         while not args.seconds or time.monotonic() - started < args.seconds:
             chunk = port.read(4096)
             if chunk:
+                if args.raw_log:
+                    with args.raw_log.open("ab") as raw_output:
+                        raw_output.write(chunk)
                 last_input = time.monotonic()
                 buffer.extend(chunk)
                 while b"\n" in buffer:
