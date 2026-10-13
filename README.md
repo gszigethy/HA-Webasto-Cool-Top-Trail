@@ -19,13 +19,16 @@ Implemented:
 - HACS custom-repository layout and integration metadata.
 - Setup through Home Assistant's UI; multiple named scaffold entries.
 - A diagnostic **Protocol status** sensor with state `awaiting_protocol`.
+- An archived, sanitized ESPHome baseline and 31 imported IR pulse arrays.
+- A timing-tolerant research decoder: all arrays match `CARRIER_AC128` and pass
+  both checksums. This research tool is separate from the integration runtime.
+- A protocol specification with byte maps, timing ranges, and evidence confidence.
 - Tests for configuration, device/entity registration, reload, and unload.
 - GitHub Actions for lint, formatting, tests, hassfest, and HACS validation.
 
 Pending:
 
-- Review of the existing working prototype.
-- ESP32 receiver captures, IR decoding, and model-specific capability validation.
+- Controlled receiver captures to validate remaining fields and model capabilities.
 - Enhance the existing ESPHome transmitter's basic commands into a verified
   command encoder and define its Home Assistant interface.
 - A primary climate entity and auxiliary entities based on verified capabilities.
@@ -55,6 +58,9 @@ follow steps 4-5.
 ## Protocol research and entity mapping
 
 - [Proposed entity map](docs/entity-map.md)
+- [Reverse-engineered IR protocol](docs/ir-protocol.md)
+- [Decoded baseline packets](docs/baseline-decoded.md)
+- [ESPHome baseline review](esp32/baseline-review.md)
 - [IR capture procedure](docs/ir-capture.md)
 - [Capture storage conventions](captures/README.md)
 - [ESPHome bridge development notes](esp32/README.md)
@@ -73,6 +79,7 @@ python3.14 -m venv .venv
 .venv/bin/ruff check .
 .venv/bin/ruff format --check .
 .venv/bin/python -m pytest
+python scripts/analyze_ir_baseline.py
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for implementation and release conventions.
