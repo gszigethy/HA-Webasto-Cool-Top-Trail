@@ -29,9 +29,10 @@ printed pages 14-19, sections 5.5-5.17. The cover identifies Houghton as maker.
 | Celsius/Fahrenheit display selection | Select, if transmitted | 5.14 |
 | Manually adjusted outlet louvers | No IR swing entity | 5.17 |
 
-The manual describes user functions, not frame encoding or feedback. Every
-proposed mapping still needs captures. Exact model/remote variants must be
-identified before choosing capability limits.
+The manual describes user functions, not frame encoding or feedback. The
+[CARRIER_AC128 analysis](ir-protocol.md) independently corroborates heat, cool,
+off, and 16-30 C setpoint fields from the baseline. Other mappings still need
+local captures. Identify exact model/remote variants before choosing limits.
 
 ## State semantics
 
