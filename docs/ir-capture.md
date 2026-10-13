@@ -1,9 +1,10 @@
 # IR capture procedure
 
-The working prototype and hardware details have not been provided yet. Keep
-receiver pin assignments, firmware, carrier frequency, and transport undecided
-until they are known. Record original output even if a library already reports
-a decoded value.
+An ESPHome IR transmitter already exists in the caravan and emits basic
+commands. The prototype/configuration and exact receiver hardware have not been
+provided yet. Keep receiver pin assignments, capture firmware, and carrier
+frequency undecided until they are known. Record original output even if a
+library already reports a decoded value.
 
 ## Record the environment
 

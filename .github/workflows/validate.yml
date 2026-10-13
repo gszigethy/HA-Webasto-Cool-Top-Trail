@@ -36,4 +36,3 @@ jobs:
           # Custom-repository scaffold; Home Assistant Brands registration is pending.
           ignore: brands
           comment: "false"
-

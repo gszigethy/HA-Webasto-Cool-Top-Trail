@@ -1,7 +1,17 @@
 # Proposed entity map
 
 This is a design proposal, not a list of implemented entities. The initial
-integration exposes only its protocol status diagnostic sensor.
+integration exposes only its protocol status diagnostic sensor. The intended
+primary entity is `climate`, backed by the existing ESPHome IR transmitter.
+
+## Climate interface
+
+Plan for `async_set_hvac_mode`, `async_turn_on`, `async_turn_off`,
+`async_set_temperature`, and verified fan/preset methods. Represent power-off as
+HVAC mode `off` and remember the last non-off mode for turning on. Capabilities
+will be model-specific. The existing basic transmitter commands are the starting
+point; complete command construction and state tracking must be verified before
+the climate entity is exposed.
 
 Source: [Hungarian Cool Top Trail 20/24 manual](https://varadicaravan.hu/wp-content/uploads/2022/04/Webasto-Cool-Top-Trail-20_24.pdf),
 printed pages 14-19, sections 5.5-5.17. The cover identifies Houghton as maker.
@@ -27,8 +37,8 @@ identified before choosing capability limits.
 
 - A receiver observes remote transmissions. A captured setting does not prove
   that the appliance received it or reached that state.
-- A transmitter is needed to send IR commands; a receiver alone cannot control
-  the appliance.
+- The existing ESPHome transmitter sends commands. The new receiver observes
+  transmissions for decoding and possible remote-state synchronization.
 - Separate requested settings, last observed remote settings, and any actual
   appliance feedback. Do not label a setpoint as measured room temperature.
 - Do not report `hvac_action`, temperature telemetry, energy use, faults, or
@@ -44,6 +54,6 @@ identified before choosing capability limits.
 2. Identify the exact AC, remote, ESP32 board, and IR receiver.
 3. Record repeatable captures and document frame boundaries and encoding.
 4. Implement a pure decoder with capture-backed regression tests.
-5. Choose the local bridge transport and define a versioned message contract.
-6. Expose observed state, then add verified command encoding and transmission.
+5. Review the existing ESPHome configuration and define its command/state interface.
+6. Enhance its command encoder and map the verified controls into a climate entity.
 7. Test on hardware before claiming supported models or publishing a usable release.
