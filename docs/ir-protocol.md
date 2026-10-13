@@ -101,7 +101,7 @@ in our local corpus.
 | 4 | Timer-on hour BCD in `0x7F`; enable `0x80` | Constant `0x10`; timer semantics reference only |
 | 5 | Timer-off hour BCD in `0x7F`; enable `0x80` | Constant `0x10`; reference only |
 | 6 | BCD Celsius setpoint | Every labelled heat/cool value 16-30 matches |
-| 7 | Checksum in high nibble; Celsius `0x08`, sleep `0x02` | Checksum verified; low nibble always `0x08` |
+| 7 | Checksum in high nibble; unknown `0x08`, sleep `0x02` | Baseline low nibble `0x08`; live Celsius and Fahrenheit packets also use `0x00`, contradicting the published unit-bit interpretation |
 | 8 | BCD timer-on minutes | Constant zero; reference only |
 | 9 | BCD timer-off minutes | Constant zero; reference only |
 | 10 | Counter high nibble; power low nibble | On `0x08`, off `0x0C`; counter always zero |
@@ -204,3 +204,7 @@ current validation boundary. No generated command has been sent to an appliance.
 `scripts/capture_ir_serial.py` assembles wrapped ESPHome raw log lines into
 timestamped JSONL records, preserving short/noisy frames even when decoding
 fails. The collector uses inactive serial modem lines and emits no IR commands.
+
+## Live MVP validation
+
+See the [button-by-button capture set](../captures/live/2026-10-13-mvp/README.md) for all five modes, four fan settings, on/off, temperature changes, and explicit C/F switching. Byte 7 bit 3 is now reported as unknown rather than Celsius display. Byte 11 changes from BCD 76 in Fahrenheit to zero in Celsius while byte 6 retains BCD 24. Preserve unknown flags; do not infer display units from byte 7 alone.
