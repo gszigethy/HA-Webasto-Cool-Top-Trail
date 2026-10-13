@@ -6,8 +6,9 @@
 
 A community Home Assistant custom integration for **Webasto Cool Top Trail**
 motorhome and caravan air conditioners, made by **Houghton**.
-The goal is to map verified air conditioner functionality to Home Assistant
-entities, with installation through HACS and an ESP32 infrared bridge.
+The goal is a Home Assistant **climate entity** with HVAC modes, on/off,
+target temperature, and verified fan/preset controls, installed through HACS
+and backed by the existing ESPHome infrared transmitter in the caravan.
 
 ## Current status
 
@@ -25,8 +26,9 @@ Pending:
 
 - Review of the existing working prototype.
 - ESP32 receiver captures, IR decoding, and model-specific capability validation.
-- Bridge transport selection and, for control, IR transmitter support.
-- Climate and auxiliary entities based on verified capabilities.
+- Enhance the existing ESPHome transmitter's basic commands into a verified
+  command encoder and define its Home Assistant interface.
+- A primary climate entity and auxiliary entities based on verified capabilities.
 
 The status sensor describes integration development readiness. It does not
 report connection health, actual AC operation, or captured remote settings.
@@ -55,7 +57,7 @@ follow steps 4-5.
 - [Proposed entity map](docs/entity-map.md)
 - [IR capture procedure](docs/ir-capture.md)
 - [Capture storage conventions](captures/README.md)
-- [ESP32 development notes](esp32/README.md)
+- [ESPHome bridge development notes](esp32/README.md)
 - [Hungarian Cool Top Trail 20/24 manual](https://varadicaravan.hu/wp-content/uploads/2022/04/Webasto-Cool-Top-Trail-20_24.pdf)
 
 Only the 20/24 family is documented by the supplied manual. Other Houghton or

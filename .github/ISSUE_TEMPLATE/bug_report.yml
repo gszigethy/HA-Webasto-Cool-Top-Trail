@@ -27,4 +27,3 @@ body:
     attributes:
       label: Logs and captures
       description: Remove credentials and unrelated identifying information before attaching evidence.
-
