@@ -42,9 +42,9 @@ jobs:
       - run: python -m pytest --cov=custom_components.webasto_cool_top_trail --cov-report=term-missing
 
   esphome:
-    name: ESPHome configuration validation
+    name: ESPHome validation and bridge build
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
@@ -56,3 +56,6 @@ jobs:
           cp esp32/secrets.example.yaml esp32/secrets.yaml
           esphome config esp32/baseline.yaml > /dev/null
           esphome config esp32/receiver.example.yaml > /dev/null
+          esphome config esp32/bridge.example.yaml > /dev/null
+      - name: Compile bridge firmware (never upload)
+        run: esphome compile esp32/bridge.example.yaml

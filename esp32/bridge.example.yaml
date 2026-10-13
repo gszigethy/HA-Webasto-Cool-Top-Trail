@@ -1,0 +1,106 @@
+# Production transport example: HACS owns climate and auxiliary entities.
+# Merge this transport into the caravan firmware after choosing its actual pins.
+substitutions:
+  device_name: webasto-ir-bridge
+  friendly_name: Webasto IR Bridge
+  receiver_pin: GPIO32
+  transmitter_pin: GPIO26
+
+esphome:
+  name: ${device_name}
+  friendly_name: ${friendly_name}
+  min_version: 2026.9.1
+  includes:
+    - webasto_ir.h
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+wifi:
+  ssid: !secret caravan_wifi_ssid
+  password: !secret caravan_wifi_password
+
+logger:
+  level: INFO
+
+api:
+  encryption:
+    key: !secret api_encryption_key
+  actions:
+    - action: send_frame
+      variables:
+        frame: string
+      then:
+        - if:
+            condition:
+              lambda: |-
+                webasto_ir::Frame bytes;
+                return webasto_ir::parse(frame, bytes);
+            then:
+              - lambda: |-
+                  webasto_ir::Frame bytes;
+                  webasto_ir::parse(frame, bytes);
+                  auto call = id(transmitter_ir).transmit();
+                  call.get_data()->set_data(webasto_ir::encode(bytes));
+                  call.get_data()->set_carrier_frequency(38000);
+                  call.perform();
+              # Longest frame is 251ms; acknowledge after the RMT completion callback.
+              - delay: 300ms
+              - if:
+                  condition:
+                    lambda: |-
+                      return !id(transmitter_ir).is_failed() &&
+                             !id(transmitter_ir).status_has_warning();
+                  then:
+                    - lambda: |-
+                        webasto_ir::Frame bytes;
+                        webasto_ir::parse(frame, bytes);
+                        id(transmitted_frame).publish_state(webasto_ir::format(bytes));
+              - api.respond:
+                  success: !lambda |-
+                    return !id(transmitter_ir).is_failed() &&
+                           !id(transmitter_ir).status_has_warning();
+                  error_message: "IR transmitter reported an error"
+            else:
+              - api.respond:
+                  success: false
+                  error_message: "Invalid CARRIER_AC128 frame"
+
+ota:
+  - platform: esphome
+
+text_sensor:
+  - platform: template
+    id: received_frame
+    name: Received IR frame
+    entity_category: diagnostic
+    update_interval: never
+  - platform: template
+    id: transmitted_frame
+    name: Transmitted IR frame
+    entity_category: diagnostic
+    update_interval: never
+
+remote_receiver:
+  id: receiver_ir
+  pin:
+    number: ${receiver_pin}
+    inverted: true
+  idle: 30ms
+  buffer_size: 64kb
+  filter: 50us
+  tolerance: 25%
+  on_raw:
+    then:
+      - lambda: |-
+          webasto_ir::Frame bytes;
+          if (webasto_ir::decode(x, bytes))
+            id(received_frame).publish_state(webasto_ir::format(bytes));
+
+remote_transmitter:
+  id: transmitter_ir
+  pin: ${transmitter_pin}
+  carrier_duty_percent: 50%
+  non_blocking: true

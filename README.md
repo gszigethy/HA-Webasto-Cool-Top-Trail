@@ -4,90 +4,101 @@
 [![Validate](https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail/actions/workflows/validate.yml/badge.svg)](https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail/actions/workflows/validate.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-A community Home Assistant custom integration for **Webasto Cool Top Trail**
-motorhome and caravan air conditioners, made by **Houghton**.
-The goal is a Home Assistant **climate entity** with HVAC modes, on/off,
-target temperature, and verified fan/preset controls, installed through HACS
-and backed by the existing ESPHome infrared transmitter in the caravan.
+Home Assistant controls for **Houghton-made Webasto Cool Top Trail** caravan and
+motorhome air conditioners, installed through **HACS** and using **ESPHome** IR
+hardware. One climate entity provides power, temperature, HVAC modes, fan speed,
+and Sleep. Auxiliary entities provide panel display, panel touch-control lock,
+and ON/OFF schedules.
 
-## Current status
+**Version 0.1.0 is a development implementation.** Remote frames, protocol
+fields, HA service behavior, and the firmware build are verified. Synthesized
+commands have **not yet been tested against the physical air conditioner**.
+IR state is assumed: receiving or sending a command cannot prove AC operation.
+No compressor activity, room-temperature telemetry, or fault feedback is invented.
 
-**Development scaffold, version 0.0.1. No air conditioner control yet.**
+## Setup
 
-Implemented:
+Requires Home Assistant **2026.10.1+**, ESPHome **2026.9.1+**, and an ESP32 with
+an IR transmitter. An IR receiver is recommended for physical-remote tracking;
+transmitter-only use is supported with an explicit default starting profile.
 
-- HACS custom-repository layout and integration metadata.
-- Setup through Home Assistant's UI; multiple named scaffold entries.
-- A diagnostic **Protocol status** sensor with state `awaiting_protocol`.
-- An archived, sanitized ESPHome baseline and 31 imported IR pulse arrays.
-- A timing-tolerant research decoder: all arrays match `CARRIER_AC128` and pass
-  both checksums. This research tool is separate from the integration runtime.
-- A protocol specification with byte maps, timing ranges, and evidence confidence.
-- A research full-state builder that reconstructs all 31 baseline payloads and
-  a serial collector for timestamped, wrapped ESPHome IR logs.
-- Tests for configuration, device/entity registration, reload, and unload.
-- GitHub Actions for lint, formatting, tests, hassfest, and HACS validation.
+1. Prepare the [ESPHome bridge](esp32/bridge.example.yaml) and its companion
+   [header](esp32/webasto_ir.h), using your board, actual pins, Wi-Fi credentials,
+   and native API encryption key. Build/flash it yourself when ready. The example
+   uses GPIO32 RX and GPIO26 TX on the debugging ESP; the existing caravan
+   prototype uses **GPIO2 TX**. See [installation](docs/installation.md).
+2. Pair the bridge through Home Assistant's built-in **ESPHome** integration.
+3. In HACS → Custom repositories, add
+   `https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail`, type **Integration**.
+   Download and restart Home Assistant. This is a custom repository, not a HACS
+   default-catalog entry; use `main` while no releases are published.
+4. Add **Webasto Cool Top Trail** under Settings → Devices & services.
+   Select the bridge's **Received IR frame** sensor and
+   `esphome.<device_name>_send_frame` action. Optionally select a room-temperature
+   sensor. For transmitter-only use, explicitly enable default starting settings.
+5. With a receiver, press a normal button on the physical remote while pointing
+   it at the receiver. A valid frame initializes all settings; climate controls
+   become available. No command is sent by installation, startup, or reload.
 
-Pending:
+Controls change the complete 16-byte state and preserve untouched auxiliary
+settings, unknown bits, and the last observed counter. Every explicit send
+synchronizes the clock to Home Assistant local time and calculates both checksums.
 
-- Controlled receiver captures to validate remaining fields and model capabilities.
-- Enhance the existing ESPHome transmitter's basic commands into a verified
-  command encoder and define its Home Assistant interface.
-- A primary climate entity and auxiliary entities based on verified capabilities.
+## Entities
 
-The status sensor describes integration development readiness. It does not
-report connection health, actual AC operation, or captured remote settings.
-The scaffold does not connect to hardware or send commands.
+| Entity | Controls / information |
+| --- | --- |
+| Climate | `off`, `cool`, `heat`, `dry`, `fan_only`, `heat_cool`; 16–30 °C, 1 °C steps; supported fan speeds; `none` / `sleep` presets |
+| Panel display switch | Air-distribution-panel display on/off |
+| Panel control lock switch | Panel touch controls locked/unlocked |
+| On timer / Off timer switches | Independent schedule enables; both can be enabled |
+| On time / Off time | Stored local HH:MM schedule times, retained while disabled |
+| Synchronize clock button | Send current settings with HA local clock |
+| Protocol status sensor | Bridge connectivity/readiness and assumed-state diagnostics |
 
-## Installation through HACS
+The remote's AUTO mode maps to HA `heat_cool` with **one setpoint**. Auto fan
+is distinct and supported in heat/cool. Dry uses low fan; fan-only has no target
+temperature. Sleep is enabled only during heat/cool. Louvers are manual: no
+swing entity. No ECO control or C/F display selector is exposed without enough
+local evidence. HA can display its own preferred units; changing temperature
+when the last remote frame uses Fahrenheit requires switching that remote to
+Celsius and sending a command first. The 24 °C → 76 °F observation rules out
+assuming ordinary conversion for that remote field.
 
-Requires **Home Assistant 2026.10.1 or newer** and HACS.
+## Documentation
 
-1. In HACS, open **Custom repositories**.
-2. Add `https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail` with type **Integration**.
-3. Download **HA Webasto Cool Top Trail** and restart Home Assistant.
-4. Open **Settings > Devices & services > Add integration**.
-5. Search for **Webasto Cool Top Trail** and give the scaffold a name.
+- [Installation and troubleshooting](docs/installation.md)
+- [Entity reference and examples](docs/entity-map.md)
+- [Functional design (FD)](docs/functional-design.md)
+- [Technical design (TD)](docs/technical-design.md)
+- [IR protocol: framing, byte map, checksums and evidence](docs/ir-protocol.md)
+- [Validation and appliance acceptance checklist](docs/validation.md)
+- [MVP captures](captures/live/2026-10-13-mvp/README.md)
+- [Auxiliary captures](captures/live/2026-10-13-auxiliary/README.md)
+- [Baseline review](esp32/baseline-review.md) and [decoded packets](docs/baseline-decoded.md)
+- [Capture procedure](docs/ir-capture.md) and [ESPHome notes](esp32/README.md)
+- [Hungarian manufacturer manual](https://varadicaravan.hu/wp-content/uploads/2022/04/Webasto-Cool-Top-Trail-20_24.pdf)
 
-HACS can install from `main` while there are no releases. This project is not
-listed in the HACS default catalog. Home Assistant Brands registration is also
-pending; its check alone is explicitly skipped in the HACS validation workflow.
-
-For manual installation, copy `custom_components/webasto_cool_top_trail` into
-your Home Assistant `config/custom_components` directory, then restart and
-follow steps 4-5.
-
-## Protocol research and entity mapping
-
-- [Proposed entity map](docs/entity-map.md)
-- [Reverse-engineered IR protocol](docs/ir-protocol.md)
-- [Decoded baseline packets](docs/baseline-decoded.md)
-- [ESPHome baseline review](esp32/baseline-review.md)
-- [IR capture procedure](docs/ir-capture.md)
-- [Capture storage conventions](captures/README.md)
-- [ESPHome bridge development notes](esp32/README.md)
-- [Hungarian Cool Top Trail 20/24 manual](https://varadicaravan.hu/wp-content/uploads/2022/04/Webasto-Cool-Top-Trail-20_24.pdf)
-
-Only the 20/24 family is documented by the supplied manual. Other Houghton or
-Webasto variants need their own evidence before being declared supported.
+The supplied manual covers Cool Top Trail 20/24 (Belaire H2000/H2400). Exact
+appliance/remote variants still need physical acceptance testing before support
+for further Houghton/Webasto models can be claimed.
 
 ## Development
-
-Use Python 3.14.2 or newer. Tests currently use Home Assistant 2026.10.1.
 
 ```bash
 python3.14 -m venv .venv
 .venv/bin/python -m pip install -r requirements-dev.txt
 .venv/bin/ruff check .
 .venv/bin/ruff format --check .
-.venv/bin/python -m pytest
-python scripts/analyze_ir_baseline.py
+.venv/bin/python -m pytest --cov=custom_components.webasto_cool_top_trail
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for implementation and release conventions.
+Use `python -m pytest` so the repository is on the module search path. The test
+plugin pins HA and pytest dependencies. `g++` is required to replay captures
+against the deployed C++ wire codec. Tests use an isolated HA instance, fake
+ESPHome native services, and archived frames; they never contact a live HA or ESP.
+CI runs these checks plus ESPHome example validation/build, hassfest, and HACS
+validation. Only the HACS Brands check is skipped pending registration.
 
-## License
-
-[MIT](LICENSE). This community project is not affiliated with or endorsed by
-Webasto or Houghton. External manuals remain the property of their owners and
-are linked rather than redistributed.
+Keep local secrets and device backups out of Git. No firmware or HA configuration
+is deployed by this repository's tests or workflows. See [contributing](CONTRIBUTING.md).

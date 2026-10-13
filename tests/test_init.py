@@ -1,71 +1,107 @@
-"""Verify entity registration, reload, multiple entries, and clean unloading."""
+"""Real HA platform lifecycle, identity and no unsolicited IR."""
 
+from unittest.mock import AsyncMock
+
+import voluptuous as vol
 from homeassistant.config_entries import ConfigEntryState
-from homeassistant.const import CONF_NAME, STATE_UNAVAILABLE
-from homeassistant.core import HomeAssistant
-from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.webasto_cool_top_trail.const import (
-    DOMAIN,
-    STATUS_AWAITING_PROTOCOL,
-)
+from custom_components.webasto_cool_top_trail.const import DOMAIN
+
+FRAME = "16 18 41 21 09 10 24 80 00 00 08 00 00 00 59 60"
 
 
-async def test_setup_reload_unload(hass: HomeAssistant) -> None:
-    """The scaffold has honest state and stable IDs throughout its lifecycle."""
+async def setup_bridge(hass, name="Caravan AC", frame=FRAME):
+    suffix = name.lower().replace(" ", "_")
+    receiver = f"sensor.{suffix}_frame"
+    service = f"{suffix}_send_frame"
+    hass.states.async_set(receiver, frame)
+    send = AsyncMock()
+    hass.services.async_register(
+        "esphome", service, send, schema=vol.Schema({vol.Required("frame"): str})
+    )
     entry = MockConfigEntry(
-        domain=DOMAIN, title="Caravan AC", data={CONF_NAME: "Caravan AC"}
+        domain=DOMAIN,
+        title=name,
+        version=2,
+        data={
+            "name": name,
+            "receiver_entity": receiver,
+            "send_service": f"esphome.{service}",
+        },
     )
     entry.add_to_hass(hass)
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
-    assert entry.state is ConfigEntryState.LOADED
+    return entry, send
 
+
+async def test_setup_reload_unload(hass):
+    entry, send = await setup_bridge(hass)
+    assert entry.state is ConfigEntryState.LOADED
     registry = er.async_get(hass)
     entities = er.async_entries_for_config_entry(registry, entry.entry_id)
-    assert len(entities) == 1
-    entity = entities[0]
-    state = hass.states.get(entity.entity_id)
-    assert state is not None
-    assert state.state == STATUS_AWAITING_PROTOCOL
-    assert hass.states.async_all("climate") == []
-    assert entity.device_id is not None
-    device = dr.async_get(hass).async_get(entity.device_id)
-    assert device is not None
-    assert device.identifiers == {(DOMAIN, entry.entry_id)}
-
+    assert len(entities) == 9
+    assert hass.states.get("climate.caravan_ac").state == "heat"
+    send.assert_not_called()
+    ids = {e.entity_id for e in entities}
+    assert len({e.device_id for e in entities}) == 1
     assert await hass.config_entries.async_reload(entry.entry_id)
     await hass.async_block_till_done()
-    reloaded = er.async_entries_for_config_entry(registry, entry.entry_id)
-    assert [item.entity_id for item in reloaded] == [entity.entity_id]
-    assert hass.states.get(entity.entity_id).state == STATUS_AWAITING_PROTOCOL
-
+    assert {
+        e.entity_id for e in er.async_entries_for_config_entry(registry, entry.entry_id)
+    } == ids
+    send.assert_not_called()
+    bridge = entry.runtime_data
     assert await hass.config_entries.async_unload(entry.entry_id)
     await hass.async_block_till_done()
-    assert entry.state is ConfigEntryState.NOT_LOADED
-    assert hass.states.get(entity.entity_id).state == STATE_UNAVAILABLE
+    assert hass.states.get("climate.caravan_ac").state == "unavailable"
+    assert bridge._listeners == []
 
 
-async def test_multiple_entries(hass: HomeAssistant) -> None:
-    """Separate named units have independent entities and unload independently."""
-    entries = [
-        MockConfigEntry(domain=DOMAIN, title=name, data={CONF_NAME: name})
-        for name in ("Front AC", "Rear AC")
-    ]
-    for entry in entries:
-        entry.add_to_hass(hass)
-        assert await hass.config_entries.async_setup(entry.entry_id)
+async def test_multiple_entries(hass):
+    front, _ = await setup_bridge(hass, "Front AC")
+    rear, _ = await setup_bridge(hass, "Rear AC")
+    assert await hass.config_entries.async_unload(front.entry_id)
     await hass.async_block_till_done()
+    assert hass.states.get("climate.rear_ac").state == "heat"
+    assert rear.runtime_data.available
 
-    registry = er.async_get(hass)
-    front, rear = [
-        er.async_entries_for_config_entry(registry, entry.entry_id)[0]
-        for entry in entries
-    ]
-    assert front.unique_id != rear.unique_id
-    assert front.device_id != rear.device_id
-    assert await hass.config_entries.async_unload(entries[0].entry_id)
+
+async def test_no_frame_and_disconnect(hass):
+    entry, send = await setup_bridge(hass, frame="unknown")
+    assert hass.states.get("climate.caravan_ac").state == "unavailable"
+    assert (
+        hass.states.get("sensor.caravan_ac_protocol_status").state == "awaiting_frame"
+    )
+    hass.states.async_set(entry.runtime_data.receiver, FRAME)
     await hass.async_block_till_done()
-    assert hass.states.get(rear.entity_id).state == STATUS_AWAITING_PROTOCOL
+    assert hass.states.get("climate.caravan_ac").state == "heat"
+    hass.states.async_set(entry.runtime_data.receiver, "unavailable")
+    await hass.async_block_till_done()
+    assert hass.states.get("climate.caravan_ac").state == "unavailable"
+    send.assert_not_called()
+
+
+async def test_scaffold_migration_requires_reconfigure(hass):
+    entry = MockConfigEntry(
+        domain=DOMAIN, title="Old scaffold", version=1, data={"name": "Old scaffold"}
+    )
+    entry.add_to_hass(hass)
+    assert not await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    assert entry.version == 2
+    assert entry.state is ConfigEntryState.SETUP_ERROR
+    assert not hass.states.async_all("climate")
+
+
+async def test_remove_entry_cleans_saved_frame(hass, hass_storage):
+    entry, _ = await setup_bridge(hass)
+    key = f"{DOMAIN}.{entry.entry_id}"
+    assert await hass.config_entries.async_unload(entry.entry_id)
+    await hass.async_block_till_done()
+    assert key in hass_storage
+    assert await hass.config_entries.async_remove(entry.entry_id)
+    await hass.async_block_till_done()
+    assert key not in hass_storage
