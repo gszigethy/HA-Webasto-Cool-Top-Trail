@@ -208,3 +208,15 @@ fails. The collector uses inactive serial modem lines and emits no IR commands.
 ## Live MVP validation
 
 See the [button-by-button capture set](../captures/live/2026-10-13-mvp/README.md) for all five modes, four fan settings, on/off, temperature changes, and explicit C/F switching. Byte 7 bit 3 is now reported as unknown rather than Celsius display. Byte 11 changes from BCD 76 in Fahrenheit to zero in Celsius while byte 6 retains BCD 24. Preserve unknown flags; do not infer display units from byte 7 alone.
+
+## Live auxiliary validation
+
+The [auxiliary captures](../captures/live/2026-10-13-auxiliary/README.md)
+validate display-disable byte 13 `0x40`, lock byte 13 `0x80`, sleep byte 7
+`0x02`, timer enables byte 4/5 `0x80`, and independently edited timer minutes
+in bytes 8/9. ON, OFF, both, and neither enable combinations were captured.
+Timer times remain stored when disabled. SET TIME and HOUR/MIN navigate local
+editing; no complete IR packet was observed for navigation alone. Value edits
+produced full-state packets, but the exact send trigger is not yet isolated.
+These newer captures supersede the baseline-only evidence column above for
+auxiliary fields. Air-conditioner responses are not yet physically verified.
