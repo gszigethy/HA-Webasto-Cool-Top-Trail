@@ -45,17 +45,13 @@ Choose your setup:
 ### Copy the device YAML
 
 Create a device in ESPHome Device Builder and paste the contents of
-[bridge.example.yaml](../esp32/bridge.example.yaml) into its YAML editor.
+[esp32/example.yaml](../esp32/example.yaml) into its YAML editor. Comments in the file say what to change and what to remove.
 
-ESPHome downloads the shared IR configuration and C++ code from GitHub when you
-validate or install the device. **You do not need to download or place a header
-file.** The computer running Device Builder needs internet access for that download;
+The file is complete on its own. When you validate or install the device, ESPHome
+downloads only the IR codec (`webasto_ir.h`) from GitHub through
+`external_components:`. **You do not need to download or place a header file.**
+The computer running Device Builder needs internet access for that download;
 the ESP32 controls the AC locally after installation.
-
-This package-based example was added after **1.0.0 beta 1**. Its `webasto_ref: main`
-uses the current repository configuration. Do not change it to `v1.0.0-beta.1`,
-which does not contain the packages. Future releases can be selected by changing
-this value to their tag.
 
 ### Set your device name and pins
 
@@ -78,23 +74,23 @@ The example uses GPIO26 for sending and GPIO32 for receiving because those were 
 
 Also check the `esp32` board setting against your board. The example uses `esp32dev` with the ESP-IDF framework.
 
-**If you have no receiver:** remove the `esp32/packages/receiver.yaml` line from the `packages` list. The optional `receiver_pin` substitution can also be removed. The sending action and Transmitted IR frame sensor remain in the bridge package automatically.
+**If you have no receiver:** delete the two parts marked *Only with an IR receiver*: the **Received IR frame** sensor and the `remote_receiver:` section. The `receiver_pin` substitution can be removed too.
 
 Keep the sensor names and the `send_frame` action name as in the example. The integration finds them on the ESP32 by these names.
 
-**If updating an existing ESPHome device:** add the example's `packages:` block and pin substitutions to your existing YAML. Keep your existing board, Wi-Fi, API encryption, OTA and other hardware settings. If your YAML already has `packages:` or `substitutions:`, add to those sections instead of creating a second copy. The package supplies `api.reboot_timeout: 0s`; keep this value if you also set it locally. Remove the old `includes: webasto_ir.h` entry and old Webasto sending action, sensors and receiver/transmitter blocks before using the package, to avoid duplicate IDs. Unrelated IR functions may need their existing receiver/transmitter blocks merged with the package by ID. Stop using the old fixed-command buttons or automations to control the AC once you switch to the new climate control.
+**If updating an existing ESPHome device:** copy the example's `external_components:`, `webasto_ir:`, `api:` action, `remote_transmitter:`, `text_sensor:` and (with a receiver) `remote_receiver:` parts into your existing YAML. Keep your existing board, Wi-Fi, API encryption, OTA and other hardware settings, and add to existing sections instead of creating a second copy. Remove any old `includes: webasto_ir.h` entry or Webasto `packages:` block. Stop using the old fixed-command buttons or automations to control the AC once you switch to the new climate control.
 
 ### Add Wi-Fi details and an encryption key
 
-In the same folder, add these entries to `secrets.yaml`, using your own values:
+Open **Secrets** in ESPHome Device Builder (it edits `secrets.yaml`) and make sure these entries exist, using your own values. Device Builder usually already has `wifi_ssid` and `wifi_password`:
 
 ```yaml
-caravan_wifi_ssid: "YOUR_WIFI_NAME"
-caravan_wifi_password: "YOUR_WIFI_PASSWORD"
+wifi_ssid: "YOUR_WIFI_NAME"
+wifi_password: "YOUR_WIFI_PASSWORD"
 api_encryption_key: "YOUR_ESPHOME_API_ENCRYPTION_KEY"
 ```
 
-The API encryption key protects the connection between Home Assistant and your ESP32. Use the key generated for your device by ESPHome Device Builder, or retain its existing key when updating a device. It is not your Wi-Fi password. Do not use the placeholder key in this repository's example secrets file.
+The API encryption key protects the connection between Home Assistant and your ESP32. Use the key generated for your device by ESPHome Device Builder, or retain its existing key when updating a device. It is not your Wi-Fi password.
 
 If your existing configuration uses different secret names, either change the YAML references to match them or add the three entries above. Keep your real credentials private.
 
@@ -105,12 +101,12 @@ In ESPHome Device Builder, validate the device configuration, then use **Install
 If you use the command line instead:
 
 ```bash
-esphome config bridge.example.yaml
-esphome compile bridge.example.yaml
-esphome upload bridge.example.yaml
+esphome config example.yaml
+esphome compile example.yaml
+esphome upload example.yaml
 ```
 
-Replace `bridge.example.yaml` with your actual YAML filename if you renamed it.
+Replace `example.yaml` with your actual YAML filename if you renamed it.
 
 **Before continuing:** the ESP32 should be connected to Wi-Fi and shown as online in ESPHome. You have installed the sending firmware, but have not yet added the Webasto climate control.
 
