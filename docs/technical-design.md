@@ -110,7 +110,7 @@ each other. An exception leaves frame/source unchanged and propagates to HA.
 Timeout is reported as ambiguous and never automatically retried.
 
 Diagnostics identify `unknown`, `default`, `received`, `commanded` or `restored`
-source; `appliance_feedback` is always false. Receive/command times are current
+source. IR provides no appliance feedback. Receive/command times are current
 HA session observation timestamps, distinct from remote clock fields. A receiver
 can capture our own emitted frame: `received` means observed IR, not guaranteed
 physical-remote provenance. No optimistic compressor operation is inferred.
