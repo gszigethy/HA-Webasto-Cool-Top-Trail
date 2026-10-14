@@ -3,34 +3,29 @@
     "step": {
       "user": {
         "title": "Webasto Cool Top Trail",
-        "description": "Pair the bridge using the built-in ESPHome integration first. Select its Received IR frame sensor and send_frame action. Controls wait for a valid remote frame. For a transmitter without a receiver, you may opt into default starting settings: off, cool, 24 °C, auto fan, display on, unlocked, Sleep and timers off. The first explicit command applies that complete profile. IR provides no appliance feedback; room temperature is optional.",
+        "description": "Pair the IR bridge with the built-in ESPHome integration first, then select it here. If the bridge has an IR receiver, press any button on the physical remote once to load the current settings. Without a receiver, controls start from default settings: off, cool, 24 °C, auto fan, display on, unlocked, Sleep and timers off; the first command you send applies that complete profile. IR provides no appliance feedback; room temperature is optional.",
         "data": {
           "name": "Name",
-          "receiver_entity": "ESPHome received IR frame sensor",
-          "send_service": "ESPHome send_frame action",
-          "temperature_sensor": "Room temperature sensor (optional)",
-          "use_default_state": "Use default starting settings (transmitter only)"
+          "device_id": "ESPHome IR bridge",
+          "temperature_sensor": "Room temperature sensor (optional)"
         }
       },
       "reconfigure": {
         "title": "Webasto Cool Top Trail",
-        "description": "Pair the bridge using the built-in ESPHome integration first. Select its Received IR frame sensor and send_frame action. Controls wait for a valid remote frame. For a transmitter without a receiver, you may opt into default starting settings: off, cool, 24 °C, auto fan, display on, unlocked, Sleep and timers off. The first explicit command applies that complete profile. IR provides no appliance feedback; room temperature is optional.",
+        "description": "Pair the IR bridge with the built-in ESPHome integration first, then select it here. If the bridge has an IR receiver, press any button on the physical remote once to load the current settings. Without a receiver, controls start from default settings: off, cool, 24 °C, auto fan, display on, unlocked, Sleep and timers off; the first command you send applies that complete profile. IR provides no appliance feedback; room temperature is optional.",
         "data": {
           "name": "Name",
-          "receiver_entity": "ESPHome received IR frame sensor",
-          "send_service": "ESPHome send_frame action",
-          "temperature_sensor": "Room temperature sensor (optional)",
-          "use_default_state": "Use default starting settings (transmitter only)"
+          "device_id": "ESPHome IR bridge",
+          "temperature_sensor": "Room temperature sensor (optional)"
         }
       }
     },
     "error": {
       "invalid_name": "Enter a non-empty name.",
-      "invalid_service": "Select a registered esphome send_frame action.",
-      "invalid_receiver": "Select an existing ESPHome received-frame sensor."
+      "not_bridge": "This ESPHome device has no send_frame action. Install the bridge firmware and make sure the device is online."
     },
     "abort": {
-      "already_configured": "This receiver already has an integration entry.",
+      "already_configured": "This ESPHome device already has an integration entry.",
       "reconfigure_successful": "Bridge configuration updated."
     }
   },
