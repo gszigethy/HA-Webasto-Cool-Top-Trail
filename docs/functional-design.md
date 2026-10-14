@@ -58,8 +58,8 @@ Panel display and control lock are boolean configuration switches. The latter
 locks appliance touch controls and is not a security/door lock. Independent ON
 and OFF enables are two switches, representing all four combinations without
 a redundant selector. Schedule times use HA time entities with HH:MM precision.
-An explicit clock-sync button represents a momentary action. Protocol status
-is a diagnostic enum sensor. See [the full reference](entity-map.md).
+The appliance clock is refreshed on every command HA sends; there is no separate
+clock-sync action. Protocol status is a diagnostic enum sensor. See [the full reference](entity-map.md).
 
 No separate Sleep switch duplicates the climate preset. No fake measured room
 temperature comes from target temperature. No compressor action, power/energy,

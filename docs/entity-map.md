@@ -2,7 +2,7 @@
 
 These entities are implemented in version 0.1.0. Example IDs assume entry name
 **Caravan AC** and no naming collisions; actual IDs come from the entity registry.
-All nine entities share one Houghton device. IDs/unique IDs survive reloads and
+All eight entities share one Houghton device. IDs/unique IDs survive reloads and
 entry-title changes; creating another entry gives it independent identity.
 
 | Example entity ID | Domain / category | Behavior |
@@ -14,7 +14,6 @@ entry-title changes; creating another entry gives it independent identity.
 | `switch.caravan_ac_off_timer` | Switch / configuration | Enable OFF schedule |
 | `time.caravan_ac_on_time` | Time / configuration | Local ON time HH:MM |
 | `time.caravan_ac_off_time` | Time / configuration | Local OFF time HH:MM |
-| `button.caravan_ac_synchronize_clock` | Button / configuration | Send current state with HA local clock |
 | `sensor.caravan_ac_protocol_status` | Enum sensor / diagnostic | `awaiting_frame`, `ready`, `disconnected` |
 
 The ESPHome device additionally exposes Received IR frame and Transmitted IR
@@ -29,7 +28,7 @@ acknowledgment. No separate power switch or fan entity duplicates climate contro
 | HVAC | `off`, `cool`, `heat`, `dry`, `fan_only`, `heat_cool` |
 | Remote AUTO | HA `heat_cool`, automatic heat/cool selection with one target; not HA's schedule/AI `auto` |
 | Target | 16–30 °C or 60–86 °F, native 1-degree step; rounded to nearest integer after HA display-unit conversion |
-| Fan | `auto`, `low`, `medium`, `high` in heat/cool; low only in dry; low/medium/high in fan-only or heat_cool |
+| Fan | `auto`, `low`, `medium`, `high` in heat/cool; low only in dry; low/medium/high in fan-only or heat_cool; a received frame outside these rules (e.g. fan-only with auto) is shown as received |
 | Sleep | Standard `sleep`/`none` climate preset; enabling requires active heat/cool |
 | Turn off/on | Power flag changed; stored operating mode retained/resumed |
 | Temperature while off | Updates the retained target and leaves power off |
@@ -104,6 +103,8 @@ sequence:
 Both timer switches can be on. Timer events execute on the appliance and do not
 produce HA feedback. Display and panel lock do not change climate power. All
 controls send complete state, so unknown and untouched fields remain intact.
+Every command HA sends refreshes the appliance clock from HA local time; there
+is no separate clock-sync action.
 
 Protocol status is always readable, including while other entities are unavailable.
 `ready` describes software transport readiness. Control state is **assumed** and
