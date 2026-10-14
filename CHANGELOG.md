@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Fetch the ESPHome IR codec and transport configuration automatically from GitHub.
+- Replace manual header placement with a short device YAML and optional receiver package.
+
+
 ## 1.0.0 beta 1 — 2026-10-14
 
 First public prerelease for Houghton-made Webasto Cool Top Trail air conditioners.
