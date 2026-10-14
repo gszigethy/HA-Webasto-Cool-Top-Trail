@@ -4,6 +4,7 @@ from unittest.mock import AsyncMock
 
 import voluptuous as vol
 from homeassistant.config_entries import ConfigEntryState
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
@@ -12,24 +13,51 @@ from custom_components.webasto_cool_top_trail.const import DOMAIN
 FRAME = "16 18 41 21 09 10 24 80 00 00 08 00 00 00 59 60"
 
 
-async def setup_bridge(hass, name="Caravan AC", frame=FRAME):
+def add_esphome_bridge(hass, name="Caravan AC", frame=FRAME, receiver=True):
+    """Register an ESPHome node like bridge.example.yaml: device, sensors, action."""
     suffix = name.lower().replace(" ", "_")
-    receiver = f"sensor.{suffix}_frame"
-    service = f"{suffix}_send_frame"
-    hass.states.async_set(receiver, frame)
+    node = f"{suffix.replace('_', '-')}-bridge"
+    esphome = MockConfigEntry(
+        domain="esphome", data={"device_name": node}, unique_id=node
+    )
+    esphome.add_to_hass(hass)
+    device = dr.async_get(hass).async_get_or_create(
+        config_entry_id=esphome.entry_id,
+        identifiers={("esphome", node)},
+        name=f"{name} bridge",
+    )
+    registry = er.async_get(hass)
+    sensors = [("Transmitted IR frame", f"{suffix}_transmitted", "unknown")]
+    if receiver:
+        sensors.append(("Received IR frame", f"{suffix}_frame", frame))
+    for original_name, object_id, state in sensors:
+        entity = registry.async_get_or_create(
+            "sensor",
+            "esphome",
+            f"{node}-{object_id}",
+            config_entry=esphome,
+            device_id=device.id,
+            original_name=original_name,
+            suggested_object_id=object_id,
+        )
+        hass.states.async_set(entity.entity_id, state)
     send = AsyncMock()
     hass.services.async_register(
-        "esphome", service, send, schema=vol.Schema({vol.Required("frame"): str})
+        "esphome",
+        f"{node.replace('-', '_')}_send_frame",
+        send,
+        schema=vol.Schema({vol.Required("frame"): str}),
     )
+    return device.id, send
+
+
+async def setup_bridge(hass, name="Caravan AC", frame=FRAME, receiver=True):
+    device_id, send = add_esphome_bridge(hass, name, frame, receiver)
     entry = MockConfigEntry(
         domain=DOMAIN,
         title=name,
-        version=2,
-        data={
-            "name": name,
-            "receiver_entity": receiver,
-            "send_service": f"esphome.{service}",
-        },
+        unique_id=device_id,
+        data={"name": name, "device_id": device_id},
     )
     entry.add_to_hass(hass)
     assert await hass.config_entries.async_setup(entry.entry_id)
@@ -47,6 +75,16 @@ async def test_setup_reload_unload(hass):
     send.assert_not_called()
     ids = {e.entity_id for e in entities}
     assert len({e.device_id for e in entities}) == 1
+    device = dr.async_get(hass).async_get(entities[0].device_id)
+    assert device.manufacturer == "Webasto"
+    assert device.model == "Cool Top Trail"
+    attributes = hass.states.get("sensor.caravan_ac_protocol_status").attributes
+    assert "appliance_feedback" not in attributes
+    assert "fahrenheit_temperature_edits_supported" not in attributes
+    assert attributes["state_source"] == "received"
+    assert attributes["frame"] == FRAME
+    assert attributes["last_received"] is not None
+    assert attributes["last_command"] is None
     assert await hass.config_entries.async_reload(entry.entry_id)
     await hass.async_block_till_done()
     assert {
@@ -78,20 +116,36 @@ async def test_no_frame_and_disconnect(hass):
     hass.states.async_set(entry.runtime_data.receiver, FRAME)
     await hass.async_block_till_done()
     assert hass.states.get("climate.caravan_ac").state == "heat"
-    hass.states.async_set(entry.runtime_data.receiver, "unavailable")
+    # ESPHome marks every entity of an offline node unavailable.
+    for entity_id in entry.runtime_data.endpoints.entities:
+        hass.states.async_set(entity_id, "unavailable")
+    await hass.async_block_till_done()
+    assert hass.states.get("climate.caravan_ac").state == "unavailable"
+    assert hass.states.get("sensor.caravan_ac_protocol_status").state == (
+        "disconnected"
+    )
+    send.assert_not_called()
+
+
+async def test_transmitter_only_starts_from_default_profile(hass):
+    entry, send = await setup_bridge(hass, receiver=False)
+    bridge = entry.runtime_data
+    assert bridge.receiver is None
+    assert bridge.source == "default"
+    assert hass.states.get("climate.caravan_ac").state == "off"
+    hass.services.async_remove("esphome", bridge.service)
     await hass.async_block_till_done()
     assert hass.states.get("climate.caravan_ac").state == "unavailable"
     send.assert_not_called()
 
 
-async def test_scaffold_migration_requires_reconfigure(hass):
+async def test_missing_device_requires_reconfigure(hass):
     entry = MockConfigEntry(
-        domain=DOMAIN, title="Old scaffold", version=1, data={"name": "Old scaffold"}
+        domain=DOMAIN, title="Gone", data={"name": "Gone", "device_id": "missing"}
     )
     entry.add_to_hass(hass)
     assert not await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
-    assert entry.version == 2
     assert entry.state is ConfigEntryState.SETUP_ERROR
     assert not hass.states.async_all("climate")
 
@@ -105,3 +159,30 @@ async def test_remove_entry_cleans_saved_frame(hass, hass_storage):
     assert await hass.config_entries.async_remove(entry.entry_id)
     await hass.async_block_till_done()
     assert key not in hass_storage
+
+
+async def test_corrupt_saved_frame_is_ignored(hass, hass_storage, caplog):
+    entry, send = await setup_bridge(hass, frame="unknown")
+    assert await hass.config_entries.async_unload(entry.entry_id)
+    await hass.async_block_till_done()
+    hass_storage[f"{DOMAIN}.{entry.entry_id}"] = {
+        "version": 1,
+        "minor_version": 1,
+        "key": f"{DOMAIN}.{entry.entry_id}",
+        "data": {"frame": "16 00"},
+    }
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    assert entry.state is ConfigEntryState.LOADED
+    assert entry.runtime_data.frame is None
+    assert entry.runtime_data.source == "unknown"
+    assert (
+        hass.states.get("sensor.caravan_ac_protocol_status").state == "awaiting_frame"
+    )
+    assert any(
+        record.name == "custom_components.webasto_cool_top_trail.coordinator"
+        and record.levelname == "WARNING"
+        and record.message == "Ignoring invalid saved IR state"
+        for record in caplog.records
+    )
+    send.assert_not_called()
