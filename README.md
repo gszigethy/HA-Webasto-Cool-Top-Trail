@@ -16,6 +16,26 @@ commands have **not yet been tested against the physical air conditioner**.
 IR state is assumed: receiving or sending a command cannot prove AC operation.
 No compressor activity, room-temperature telemetry, or fault feedback is invented.
 
+## Does this require a physical remote?
+
+No. This integration implements a fixed CARRIER_AC128 protocol and generates
+complete state packets; it does not learn separate button waveforms. There is
+no IR pairing with the appliance. For the supported Webasto Cool Top Trail
+profile, a transmitter-only installation can use the optional default state
+without owning or capturing a remote. Enable **Use default state** during setup;
+no command is sent until you operate a control. The default uses Celsius.
+
+Receiving a physical remote frame is optional. It supplies a full-state template
+so commands preserve its display unit, timer values and unknown flags, and lets
+HA follow subsequent physical remote commands. Without a received frame or an
+explicitly enabled default state, controls wait for initialization. This is a
+software initialization policy, not an appliance pairing requirement.
+
+A receiver detects remote commands, not feedback from the air conditioner.
+Protocol support is verified from this remote's recordings; generated commands
+still need appliance acceptance testing. Sharing the CARRIER_AC128 wire format
+alone does not establish compatibility with every Houghton or Carrier model.
+
 ## Setup
 
 Requires Home Assistant **2026.10.1+**, ESPHome **2026.9.1+**, and an ESP32 with

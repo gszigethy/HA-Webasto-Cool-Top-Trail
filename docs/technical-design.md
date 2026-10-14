@@ -156,3 +156,11 @@ Architectural references: [HA entity development](https://developers.home-assist
 [HA climate interface](https://developers.home-assistant.io/docs/core/entity/climate/),
 [ESPHome native API](https://esphome.io/components/api/) and
 [ESPHome receiver](https://esphome.io/components/remote_receiver/).
+
+## Fixed codec and optional state template
+
+The codec constructs commands algorithmically, without IR pairing or per-button
+learning. A received frame is an optional template for preserving settings and
+unknown fields. Transmitter-only users can explicitly initialize the built-in
+default Celsius state. This does not claim compatibility with other models or
+appliance feedback. See [initialization and remote requirements](installation.md).
