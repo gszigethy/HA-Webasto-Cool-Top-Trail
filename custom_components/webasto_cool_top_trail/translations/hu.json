@@ -57,11 +57,6 @@
         "name": "Kikapcsolási idő"
       }
     },
-    "button": {
-      "sync_clock": {
-        "name": "Óra szinkronizálása"
-      }
-    },
     "sensor": {
       "protocol_status": {
         "name": "Protokoll állapot",
