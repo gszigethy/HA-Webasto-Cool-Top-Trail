@@ -13,7 +13,7 @@ async def async_setup_entry(hass, entry, async_add_entities) -> None:
 class WebastoStatus(WebastoEntity, SensorEntity):
     _attr_device_class = SensorDeviceClass.ENUM
     _attr_entity_category = EntityCategory.DIAGNOSTIC
-    _attr_options = ["awaiting_frame", "ready", "disconnected"]
+    _attr_options = ["ready", "disconnected"]
 
     @property
     def available(self):
@@ -23,7 +23,7 @@ class WebastoStatus(WebastoEntity, SensorEntity):
     def native_value(self):
         if not self.bridge.connected:
             return "disconnected"
-        return "ready" if self.bridge.frame else "awaiting_frame"
+        return "ready"
 
     @property
     def extra_state_attributes(self):

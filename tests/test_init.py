@@ -9,6 +9,7 @@ from homeassistant.helpers import entity_registry as er
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.webasto_cool_top_trail.const import DOMAIN
+from custom_components.webasto_cool_top_trail.protocol import default_frame
 
 FRAME = "16 18 41 21 09 10 24 80 00 00 08 00 00 00 59 60"
 
@@ -107,12 +108,15 @@ async def test_multiple_entries(hass):
     assert rear.runtime_data.available
 
 
-async def test_no_frame_and_disconnect(hass):
+async def test_default_until_remote_frame_and_disconnect(hass):
     entry, send = await setup_bridge(hass, frame="unknown")
-    assert hass.states.get("climate.caravan_ac").state == "unavailable"
-    assert (
-        hass.states.get("sensor.caravan_ac_protocol_status").state == "awaiting_frame"
-    )
+    # Usable at once with the receiver fitted; nothing is sent.
+    state = hass.states.get("climate.caravan_ac")
+    assert state.state == "off"
+    assert state.attributes["temperature"] == 22
+    assert entry.runtime_data.source == "default"
+    assert hass.states.get("sensor.caravan_ac_protocol_status").state == "ready"
+    # A remote press replaces the defaults.
     hass.states.async_set(entry.runtime_data.receiver, FRAME)
     await hass.async_block_till_done()
     assert hass.states.get("climate.caravan_ac").state == "heat"
@@ -174,11 +178,9 @@ async def test_corrupt_saved_frame_is_ignored(hass, hass_storage, caplog):
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
     assert entry.state is ConfigEntryState.LOADED
-    assert entry.runtime_data.frame is None
-    assert entry.runtime_data.source == "unknown"
-    assert (
-        hass.states.get("sensor.caravan_ac_protocol_status").state == "awaiting_frame"
-    )
+    assert entry.runtime_data.frame == default_frame()
+    assert entry.runtime_data.source == "default"
+    assert hass.states.get("sensor.caravan_ac_protocol_status").state == "ready"
     assert any(
         record.name == "custom_components.webasto_cool_top_trail.coordinator"
         and record.levelname == "WARNING"

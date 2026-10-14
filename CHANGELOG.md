@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Controls are available immediately, with or without an IR receiver, starting
+  from off, heat/cool, 22 °C, high fan. With a receiver, remote use replaces the
+  settings. The "Awaiting remote frame" status is removed.
 - Fetch the ESPHome IR codec automatically from GitHub as an external component;
   no header file needs to be placed manually.
 - One self-contained device YAML (`esp32/example.yaml`) with the sending

@@ -81,8 +81,8 @@ class WebastoBridge:
                     )
             except ValueError, KeyError, TypeError:
                 _LOGGER.warning("Ignoring invalid saved IR state")
-        # Without a receiver nothing can be learned; start from the documented profile.
-        if self.frame is None and self.receiver is None:
+        # Controls are usable at once; a received remote frame replaces these settings.
+        if self.frame is None:
             self.frame = default_frame()
             self.source = "default"
         watched = list(self.endpoints.entities)
@@ -162,8 +162,7 @@ class WebastoBridge:
         async with self._lock:
             if not self.available:
                 raise HomeAssistantError(
-                    "Bridge disconnected or no valid frame learned. "
-                    "Send a command from the physical remote first."
+                    "IR bridge disconnected; check the ESP32's power and Wi-Fi"
                 )
             try:
                 frame = mutate_frame(
