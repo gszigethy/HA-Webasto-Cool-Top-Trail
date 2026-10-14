@@ -5,8 +5,8 @@
 Create a Python 3.14.2+ virtual environment and install `requirements-dev.txt`.
 Run Ruff lint, Ruff formatting checks, and pytest as shown in the README.
 GitHub Actions also runs Home Assistant hassfest and HACS validation.
-The HACS `brands` check is temporarily skipped because registration is pending;
-all other checks run. Remove that exception when branding has been registered.
+All HACS checks run, including `brands`: the integration ships its own icon in
+`custom_components/webasto_cool_top_trail/brand/`.
 
 Tests use Home Assistant's custom-component test plugin and a real test
 instance. Network access is disabled during tests. Hardware claims require
