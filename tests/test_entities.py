@@ -111,7 +111,9 @@ async def test_modes_presets_and_no_fake_telemetry(hass):
     assert state.attributes["current_temperature"] is None
     assert "hvac_action" not in state.attributes
     assert state.attributes["fan_modes"] == ["low", "medium", "high"]
-    with pytest.raises(HomeAssistantError):
+    with pytest.raises(
+        HomeAssistantError, match="^Turn on heat or cool before enabling Sleep$"
+    ):
         await entry.runtime_data.async_send(preset="sleep")
     with pytest.raises(HomeAssistantError):
         await entry.runtime_data.async_send(temperature=22)
