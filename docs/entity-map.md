@@ -28,7 +28,7 @@ acknowledgment. No separate power switch or fan entity duplicates climate contro
 | HVAC | `off`, `cool`, `heat`, `dry`, `fan_only`, `heat_cool` |
 | Remote AUTO | HA `heat_cool`, automatic heat/cool selection with one target; not HA's schedule/AI `auto` |
 | Target | 16–30 °C or 60–86 °F, native 1-degree step; rounded to nearest integer after HA display-unit conversion |
-| Fan | `auto`, `low`, `medium`, `high` in heat/cool; low only in dry; low/medium/high in fan-only or heat_cool |
+| Fan | `auto`, `low`, `medium`, `high` in heat/cool; low only in dry; low/medium/high in fan-only or heat_cool; a received frame outside these rules (e.g. fan-only with auto) is shown as received |
 | Sleep | Standard `sleep`/`none` climate preset; enabling requires active heat/cool |
 | Turn off/on | Power flag changed; stored operating mode retained/resumed |
 | Temperature while off | Updates the retained target and leaves power off |
