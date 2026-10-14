@@ -2,8 +2,15 @@
 
 ## Unreleased
 
-- Fetch the ESPHome IR codec and transport configuration automatically from GitHub.
-- Replace manual header placement with a short device YAML and optional receiver package.
+- Fetch the ESPHome IR codec automatically from GitHub as an external component;
+  no header file needs to be placed manually.
+- One self-contained device YAML (`esp32/example.yaml`) with the sending
+  action, sensors and optional receiver; no remote YAML packages and no
+  separate secrets, receiver or bridge YAML files. Research YAML moved to
+  `captures/`.
+- Simpler, beginner-friendly README with the full device YAML.
+- Show the Webasto "W" logo as the integration icon in Home Assistant
+  (from the CC0 [Webasto Logo 2024.svg](https://commons.wikimedia.org/wiki/File:Webasto_Logo_2024.svg)).
 
 
 ## 1.0.0 beta 1 — 2026-10-14

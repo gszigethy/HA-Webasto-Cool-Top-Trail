@@ -1,0 +1,119 @@
+# Webasto Cool Top Trail IR bridge for Home Assistant.
+# Paste this into ESPHome Device Builder, then:
+#   1. CHANGE the pins and the board below to match your hardware.
+#   2. No IR receiver? REMOVE the two parts marked "Only with an IR receiver".
+#   3. Add wifi_ssid, wifi_password and api_encryption_key under Secrets in
+#      Device Builder (use the API key Device Builder generated for this device).
+# Keep the send_frame action and sensor names: the integration finds them by name.
+
+substitutions:
+  device_name: webasto-ir-bridge       # CHANGE if you like: network name
+  friendly_name: Webasto IR Bridge     # CHANGE if you like: name shown in Home Assistant
+  transmitter_pin: GPIO26              # CHANGE: GPIO of your IR LED
+  receiver_pin: GPIO32                 # CHANGE: GPIO of your IR receiver
+
+esphome:
+  name: ${device_name}
+  friendly_name: ${friendly_name}
+  min_version: 2026.9.1
+
+esp32:
+  board: esp32dev                      # CHANGE: your board, e.g. m5stack-atom
+  framework:
+    type: esp-idf
+
+# Downloads only the IR codec (webasto_ir.h) from GitHub. Nothing else is fetched.
+external_components:
+  - source: github://gszigethy/HA-Webasto-Cool-Top-Trail@main
+    components: [webasto_ir]
+
+webasto_ir:
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+logger:
+
+ota:
+  - platform: esphome
+
+api:
+  encryption:
+    key: !secret api_encryption_key
+  reboot_timeout: 0s                   # Keep running when Home Assistant is out of reach.
+  actions:
+    - action: send_frame
+      variables:
+        frame: string
+      then:
+        - if:
+            condition:
+              lambda: |-
+                webasto_ir::Frame bytes;
+                return webasto_ir::parse(frame, bytes);
+            then:
+              - lambda: |-
+                  webasto_ir::Frame bytes;
+                  webasto_ir::parse(frame, bytes);
+                  auto call = id(transmitter_ir).transmit();
+                  call.get_data()->set_data(webasto_ir::encode(bytes));
+                  call.get_data()->set_carrier_frequency(38000);
+                  call.perform();
+              # Longest frame is 251 ms; report the result once it has been sent.
+              - delay: 300ms
+              - if:
+                  condition:
+                    lambda: |-
+                      return !id(transmitter_ir).is_failed() &&
+                             !id(transmitter_ir).status_has_warning();
+                  then:
+                    - lambda: |-
+                        webasto_ir::Frame bytes;
+                        webasto_ir::parse(frame, bytes);
+                        id(transmitted_frame).publish_state(webasto_ir::format(bytes));
+              - api.respond:
+                  success: !lambda |-
+                    return !id(transmitter_ir).is_failed() &&
+                           !id(transmitter_ir).status_has_warning();
+                  error_message: "IR transmitter reported an error"
+            else:
+              - api.respond:
+                  success: false
+                  error_message: "Invalid CARRIER_AC128 frame"
+
+remote_transmitter:
+  id: transmitter_ir
+  pin: ${transmitter_pin}
+  carrier_duty_percent: 50%
+  non_blocking: true
+
+text_sensor:
+  - platform: template
+    id: transmitted_frame
+    name: Transmitted IR frame
+    entity_category: diagnostic
+    update_interval: never
+  # --- Only with an IR receiver: remove this sensor if you have none ---
+  - platform: template
+    id: received_frame
+    name: Received IR frame
+    entity_category: diagnostic
+    update_interval: never
+
+# --- Only with an IR receiver: remove this whole section if you have none ---
+remote_receiver:
+  id: receiver_ir
+  pin:
+    number: ${receiver_pin}
+    inverted: true
+  idle: 30ms
+  buffer_size: 64kb
+  filter: 50us
+  tolerance: 25%
+  on_raw:
+    then:
+      - lambda: |-
+          webasto_ir::Frame bytes;
+          if (webasto_ir::decode(x, bytes))
+            id(received_frame).publish_state(webasto_ir::format(bytes));
