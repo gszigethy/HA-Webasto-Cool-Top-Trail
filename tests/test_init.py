@@ -149,3 +149,30 @@ async def test_remove_entry_cleans_saved_frame(hass, hass_storage):
     assert await hass.config_entries.async_remove(entry.entry_id)
     await hass.async_block_till_done()
     assert key not in hass_storage
+
+
+async def test_corrupt_saved_frame_is_ignored(hass, hass_storage, caplog):
+    entry, send = await setup_bridge(hass, frame="unknown")
+    assert await hass.config_entries.async_unload(entry.entry_id)
+    await hass.async_block_till_done()
+    hass_storage[f"{DOMAIN}.{entry.entry_id}"] = {
+        "version": 1,
+        "minor_version": 1,
+        "key": f"{DOMAIN}.{entry.entry_id}",
+        "data": {"frame": "16 00"},
+    }
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    assert entry.state is ConfigEntryState.LOADED
+    assert entry.runtime_data.frame is None
+    assert entry.runtime_data.source == "unknown"
+    assert (
+        hass.states.get("sensor.caravan_ac_protocol_status").state == "awaiting_frame"
+    )
+    assert any(
+        record.name == "custom_components.webasto_cool_top_trail.coordinator"
+        and record.levelname == "WARNING"
+        and record.message == "Ignoring invalid saved IR state"
+        for record in caplog.records
+    )
+    send.assert_not_called()
