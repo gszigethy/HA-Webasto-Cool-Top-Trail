@@ -4,6 +4,7 @@ from unittest.mock import AsyncMock
 
 import voluptuous as vol
 from homeassistant.config_entries import ConfigEntryState
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
@@ -47,6 +48,16 @@ async def test_setup_reload_unload(hass):
     send.assert_not_called()
     ids = {e.entity_id for e in entities}
     assert len({e.device_id for e in entities}) == 1
+    device = dr.async_get(hass).async_get(entities[0].device_id)
+    assert device.manufacturer == "Webasto"
+    assert device.model == "Cool Top Trail"
+    attributes = hass.states.get("sensor.caravan_ac_protocol_status").attributes
+    assert "appliance_feedback" not in attributes
+    assert "fahrenheit_temperature_edits_supported" not in attributes
+    assert attributes["state_source"] == "received"
+    assert attributes["frame"] == FRAME
+    assert attributes["last_received"] is not None
+    assert attributes["last_command"] is None
     assert await hass.config_entries.async_reload(entry.entry_id)
     await hass.async_block_till_done()
     assert {
