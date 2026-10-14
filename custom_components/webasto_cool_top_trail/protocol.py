@@ -162,7 +162,8 @@ def parse_frame(frame: str) -> bytes:
             raise ValueError("Invalid clock or timer value")
     if any(from_bcd(payload[i] & 127) > 23 for i in (4, 5)):
         raise ValueError("Invalid timer hour")
-    if payload[11] and not 60 <= from_bcd(payload[11]) <= 90:
+    # 60-86 F is exactly the 16-30 C range; wider values cannot be consistent.
+    if payload[11] and not 60 <= from_bcd(payload[11]) <= 86:
         raise ValueError("Invalid Fahrenheit setpoint")
     return payload
 

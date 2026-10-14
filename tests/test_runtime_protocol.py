@@ -135,3 +135,23 @@ def test_fahrenheit_corpus_roundtrip():
         else:
             with pytest.raises(ValueError):
                 decode_pulses(record["pulses_us"])
+
+
+def _with_checksums(payload: bytes) -> str:
+    result = bytearray(payload)
+    for start in (0, 8):
+        result[start + 7] = (checksum(bytes(result[start : start + 8])) << 4) | (
+            result[start + 7] & 15
+        )
+    return result.hex()
+
+
+@pytest.mark.parametrize("fahrenheit,valid", [(60, True), (86, True), (87, False)])
+async def test_received_fahrenheit_range_matches_controls(fahrenheit, valid):
+    frame = bytearray(parse_frame("16 18 18 21 09 10 24 C0 00 00 08 76 00 00 08 D0"))
+    frame[11] = int(str(fahrenheit), 16)
+    if valid:
+        assert parse_frame(_with_checksums(frame))[11] == frame[11]
+    else:
+        with pytest.raises(ValueError, match="Fahrenheit"):
+            parse_frame(_with_checksums(frame))
