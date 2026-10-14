@@ -221,3 +221,13 @@ More help: [installation guide](docs/installation.md#if-something-does-not-work)
 - [How the IR protocol was decoded](docs/ir-protocol.md)
 - [Testing status](docs/validation.md) · [Contributing](CONTRIBUTING.md) · [Changelog](CHANGELOG.md)
 - [Manufacturer's manual (Hungarian)](https://varadicaravan.hu/wp-content/uploads/2022/04/Webasto-Cool-Top-Trail-20_24.pdf)
+
+## Credits
+
+- **[IRremoteESP8266](https://github.com/crankyoldgit/IRremoteESP8266)** by [@crankyoldgit](https://github.com/crankyoldgit) and contributors: the `CARRIER_AC128` protocol and its wire timings, which identified this remote's signal.
+- **[@mrmees](https://github.com/mrmees)**: the [esphome-houghton-ac](https://github.com/mrmees/esphome-houghton-ac) project and its byte-level analysis of the Houghton protocol ([#2009](https://github.com/crankyoldgit/IRremoteESP8266/issues/2009), [#2247](https://github.com/crankyoldgit/IRremoteESP8266/issues/2247)), the main field-map reference.
+- **[@MarkEvens](https://github.com/MarkEvens)**: the original report that led to `CARRIER_AC128` being identified ([#1797](https://github.com/crankyoldgit/IRremoteESP8266/issues/1797)).
+- **Webasto**: the "W" logo used as the integration icon, from their CC0 [Webasto Logo 2024.svg](https://commons.wikimedia.org/wiki/File:Webasto_Logo_2024.svg).
+- **[Home Assistant](https://www.home-assistant.io/)**, **[ESPHome](https://esphome.io/)** and **[HACS](https://hacs.xyz/)**, which this integration builds on.
+
+Webasto and Cool Top Trail are trademarks of their respective owners. This is an independent community project, not affiliated with or endorsed by Webasto or Houghton.
