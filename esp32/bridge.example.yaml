@@ -71,7 +71,9 @@ api:
 ota:
   - platform: esphome
 
+# Keep these names: the Home Assistant integration finds the sensors by name.
 text_sensor:
+  # Without an IR receiver, delete this sensor together with remote_receiver.
   - platform: template
     id: received_frame
     name: Received IR frame

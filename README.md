@@ -28,7 +28,7 @@ These appear as one climate control and a few additional controls. An optional r
 2. In HACS, add `https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail` as a **custom repository**, category **Integration**. Download it and restart Home Assistant.
 3. Go to **Settings → Devices & services → Add integration** and search for **Webasto Cool Top Trail**.
 
-The [setup walkthrough](docs/installation.md#4-add-webasto-cool-top-trail) explains what to select in every field, including the confusingly named **Received IR frame** sensor. If your ESP32 has no receiver, enable **Use default starting settings (transmitter only)**.
+The [setup walkthrough](docs/installation.md#4-add-webasto-cool-top-trail) explains every field. You select the ESP32; the integration finds its sending action and, if fitted, its receiver by itself.
 
 ## Documentation
 

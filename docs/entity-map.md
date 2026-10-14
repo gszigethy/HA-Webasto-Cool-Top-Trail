@@ -17,8 +17,8 @@ entry-title changes; creating another entry gives it independent identity.
 | `button.caravan_ac_synchronize_clock` | Button / configuration | Send current state with HA local clock |
 | `sensor.caravan_ac_protocol_status` | Enum sensor / diagnostic | `awaiting_frame`, `ready`, `disconnected` |
 
-The ESPHome device additionally exposes Received IR frame and Transmitted IR
-frame diagnostic sensors. Those are transport endpoints, not duplicate climate
+The ESPHome device additionally exposes a Transmitted IR frame diagnostic
+sensor and, with a receiver, a Received IR frame sensor. Those are transport endpoints, not duplicate climate
 entities. Transmitted IR frame indicates local transmitter processing, not AC
 acknowledgment. No separate power switch or fan entity duplicates climate controls.
 

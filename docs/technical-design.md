@@ -20,12 +20,13 @@ third-party Python runtime requirement is introduced; the manifest declares
 `esphome` as a dependency. The firmware has no climate entity and thus creates
 no competing climate controller.
 
-HA configuration binds a sensor entity and a registered `esphome.*_send_frame`
-action by name, plus optional room-temperature source and default-profile opt-in.
-The UI exposes ESPHome sensors and send_frame actions; the user chooses endpoints
-for the same AC. Endpoints can be on separate ESPs. Renaming/moving an endpoint
-requires Reconfigure; room-sensor changes require the same flow. Receiver
-identity prevents duplicate entries even if display names differ.
+HA configuration binds one ESPHome device, plus an optional room-temperature
+source. `discovery.py` resolves it at each setup: the action is
+`esphome.<node>_send_frame`, using the node name stored by the ESPHome entry and
+the ESPHome integration's naming; the receiver is the device's sensor whose
+original name is `Received IR frame`. Without one, the default profile is used.
+The device ID is the entry's unique ID, so renaming entities cannot create
+duplicates. Changing the bridge firmware's entities requires a reload.
 
 ## Modules and runtime interfaces
 
@@ -37,7 +38,8 @@ identity prevents duplicate entries even if display names differ.
 | `climate.py` | Standard HVAC/target/fan/preset service methods, optional measured temperature |
 | `switch.py`, `time.py`, `button.py` | Auxiliary boolean settings, stored schedule times and explicit clock sync |
 | `sensor.py` | Readiness and source/frame/session timestamp diagnostics |
-| `config_flow.py` | UI create/reconfigure flow, names, duplicate endpoint protection |
+| `config_flow.py` | UI create/reconfigure flow, names, duplicate device protection |
+| `discovery.py` | Resolve an ESPHome device to its send action, optional receiver sensor and entities |
 | `esp32/webasto_ir.h` | Standalone C++ wire parser/encoder/receiver decoder, independent of HA |
 | `esp32/bridge.example.yaml` | ESPHome API, Wi-Fi, TX/RX hardware and sensor publication |
 | `scripts/` | Offline research and private raw serial collection; not imported by the installed integration |
@@ -128,14 +130,14 @@ Removing the entry removes its saved template.
 Entity unique IDs are `<entry_id>_<function>` and device identifiers are
 `(webasto_cool_top_trail, entry_id)`. Reconfiguration preserves this identity and
 reloads listeners. Unload removes subscriptions and marks the runtime closed;
-there is no hardware stop/off command. Scaffold version 1 migrates to entry
-version 2 without inventing bindings and requires UI Reconfigure.
+there is no hardware stop/off command. A missing device fails setup and asks for
+Reconfigure.
 
-Availability combines a registered send action with a selected sensor that exists
-and is not unavailable. Unknown sensor state can mean a connected transmitter-only
-bridge without a received frame. A valid saved/learned/default template is also
-required for controls. A separate receiver does not directly expose sender-device
-connectivity; sender native-API errors remain authoritative during calls. Protocol
+Availability combines a registered send action with at least one of the device's
+ESPHome entities not being unavailable: ESPHome keeps actions registered while a
+node is offline, but marks all its entities unavailable. Unknown sensor state is
+normal before any frame. A valid saved/learned/default template is also required
+for controls. Native-API errors remain authoritative during calls. Protocol
 status stays available to explain missing readiness. No command is queued for a
 future reconnect.
 
@@ -161,6 +163,6 @@ Architectural references: [HA entity development](https://developers.home-assist
 
 The codec constructs commands algorithmically, without IR pairing or per-button
 learning. A received frame is an optional template for preserving settings and
-unknown fields. Transmitter-only users can explicitly initialize the built-in
-default Celsius state. This does not claim compatibility with other models or
+unknown fields. A bridge without a receiver starts from the built-in default
+Celsius state. This does not claim compatibility with other models or
 appliance feedback. See [initialization and remote requirements](installation.md).
