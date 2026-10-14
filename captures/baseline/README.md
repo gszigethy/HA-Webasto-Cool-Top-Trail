@@ -1,7 +1,7 @@
 # Imported baseline pulse corpus
 
 `packets.json` contains 31 distinct pulse arrays extracted from the user-provided
-[ESPHome baseline](../../esp32/baseline.yaml). Labels come from its mode and
+[ESPHome baseline](baseline.yaml). Labels come from its mode and
 temperature action branches. The OFF button/select share one identical array.
 
 These are existing replay timings, not captures from a newly connected receiver.

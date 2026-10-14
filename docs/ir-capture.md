@@ -1,9 +1,9 @@
 # IR capture procedure
 
 An ESPHome IR transmitter already exists in the caravan and emits basic
-commands. Its supplied YAML is archived in `esp32/baseline.yaml`. The capture
+commands. Its supplied YAML is archived in `captures/baseline/baseline.yaml`. The capture
 ESP uses user-specified GPIO32 RX and GPIO26 TX and identifies as ESP32-PICO-D4
-with 4MB flash. Use `esp32/receiver.example.yaml` for capture-only firmware.
+with 4MB flash. Use `captures/capture-firmware.yaml` for capture-only firmware.
 Record original output even if a library already reports a decoded value;
 carrier frequency remains a configured value rather than a measured one.
 

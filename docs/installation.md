@@ -45,7 +45,7 @@ Choose your setup:
 ### Copy the device YAML
 
 Create a device in ESPHome Device Builder and paste the contents of
-[bridge.example.yaml](../esp32/bridge.example.yaml) into its YAML editor.
+[esp32/example.yaml](../esp32/example.yaml) into its YAML editor. Comments in the file say what to change and what to remove.
 
 The file is complete on its own. When you validate or install the device, ESPHome
 downloads only the IR codec (`webasto_ir.h`) from GitHub through
@@ -82,15 +82,15 @@ Keep the sensor names and the `send_frame` action name as in the example. The in
 
 ### Add Wi-Fi details and an encryption key
 
-In the same folder, add these entries to `secrets.yaml`, using your own values:
+Open **Secrets** in ESPHome Device Builder (it edits `secrets.yaml`) and make sure these entries exist, using your own values. Device Builder usually already has `wifi_ssid` and `wifi_password`:
 
 ```yaml
-caravan_wifi_ssid: "YOUR_WIFI_NAME"
-caravan_wifi_password: "YOUR_WIFI_PASSWORD"
+wifi_ssid: "YOUR_WIFI_NAME"
+wifi_password: "YOUR_WIFI_PASSWORD"
 api_encryption_key: "YOUR_ESPHOME_API_ENCRYPTION_KEY"
 ```
 
-The API encryption key protects the connection between Home Assistant and your ESP32. Use the key generated for your device by ESPHome Device Builder, or retain its existing key when updating a device. It is not your Wi-Fi password. Do not use the placeholder key in this repository's example secrets file.
+The API encryption key protects the connection between Home Assistant and your ESP32. Use the key generated for your device by ESPHome Device Builder, or retain its existing key when updating a device. It is not your Wi-Fi password.
 
 If your existing configuration uses different secret names, either change the YAML references to match them or add the three entries above. Keep your real credentials private.
 
@@ -101,12 +101,12 @@ In ESPHome Device Builder, validate the device configuration, then use **Install
 If you use the command line instead:
 
 ```bash
-esphome config bridge.example.yaml
-esphome compile bridge.example.yaml
-esphome upload bridge.example.yaml
+esphome config example.yaml
+esphome compile example.yaml
+esphome upload example.yaml
 ```
 
-Replace `bridge.example.yaml` with your actual YAML filename if you renamed it.
+Replace `example.yaml` with your actual YAML filename if you renamed it.
 
 **Before continuing:** the ESP32 should be connected to Wi-Fi and shown as online in ESPHome. You have installed the sending firmware, but have not yet added the Webasto climate control.
 

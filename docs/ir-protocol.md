@@ -13,7 +13,7 @@ changes the separate power flag, clock seconds, and second checksum.
 
 ## Evidence and provenance
 
-- Local evidence: [sanitized ESPHome baseline](../esp32/baseline.yaml), supplied
+- Local evidence: [sanitized ESPHome baseline](../captures/baseline/baseline.yaml), supplied
   by the user on 2026-10-13, and [31 extracted arrays](../captures/baseline/packets.json).
   Labels come from YAML branches; these are existing replay timings, not new
   recordings or independently verified appliance state.
@@ -83,7 +83,7 @@ Regression tests include compensated mark/space perturbations of +/-20us on
 every baseline packet.
 
 An ESPHome receiver's idle timeout must exceed the internal 20.6ms gap so one
-full command remains together. The [capture firmware](../esp32/receiver.example.yaml)
+full command remains together. The [capture firmware](../captures/capture-firmware.yaml)
 uses 30ms and a 64KB buffer. The configured receiver tolerance applies to
 ESPHome protocol matching; the Python research decoder has its own checks.
 
@@ -227,8 +227,8 @@ auxiliary fields. Air-conditioner responses are not yet physically verified.
 mutations for all corroborated modes, fans and auxiliaries. It preserves unknown
 bits/counter and supports Celsius and Fahrenheit target edits. The earlier
 research builder above remains intentionally limited to its baseline profile.
-`esp32/webasto_ir.h` implements the same wire codec for ESPHome RX/TX, tested with
-all archived waveforms. `bridge.example.yaml` exposes native frame actions and
+`components/webasto_ir/webasto_ir.h` implements the same wire codec for ESPHome RX/TX, tested with
+all archived waveforms. `esp32/example.yaml` exposes native frame actions and
 sensors; it never emits commands on boot. [Entity reference](entity-map.md),
 [FD](functional-design.md) and [TD](technical-design.md) describe runtime policies.
 
