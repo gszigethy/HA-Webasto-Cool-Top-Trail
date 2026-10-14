@@ -78,3 +78,60 @@ async def test_turn_off_preserves_sleep_and_operating_mode():
     assert off[1] == heat[1]
     assert off[7] & 2
     assert off[10] & 15 == 12
+
+
+@pytest.mark.parametrize(
+    "fahrenheit,celsius",
+    [(74, 23), (75, 24), (76, 24), (77, 25), (78, 26), (60, 16), (86, 30)],
+)
+async def test_fahrenheit_target_updates_both_fields(fahrenheit, celsius):
+    seed = parse_frame("16 18 18 21 09 10 24 C0 00 00 08 76 00 00 08 D0")
+    frame = mutate_frame(seed, time(12, 0), temperature_f=fahrenheit)
+    from custom_components.webasto_cool_top_trail.protocol import from_bcd
+
+    assert from_bcd(frame[11]) == fahrenheit
+    assert from_bcd(frame[6]) == celsius
+    assert frame[7] & 15 == seed[7] & 15
+    assert decode_pulses(encode_pulses(frame)) == frame
+
+
+@pytest.mark.parametrize(
+    "celsius,fahrenheit", [(23, 74), (24, 76), (25, 77), (16, 61), (30, 86)]
+)
+async def test_celsius_request_preserves_fahrenheit_profile(celsius, fahrenheit):
+    seed = parse_frame("16 18 18 21 09 10 24 C0 00 00 08 76 00 00 08 D0")
+    frame = mutate_frame(seed, time(12, 0), temperature=celsius)
+    from custom_components.webasto_cool_top_trail.protocol import from_bcd
+
+    assert from_bcd(frame[6]) == celsius
+    assert from_bcd(frame[11]) == fahrenheit
+
+
+@pytest.mark.parametrize("value", [59, 87, 75.5, True, float("nan")])
+async def test_invalid_fahrenheit_target_rejected(value):
+    seed = parse_frame("16 18 18 21 09 10 24 C0 00 00 08 76 00 00 08 D0")
+    with pytest.raises(ValueError):
+        mutate_frame(seed, time(12, 0), temperature_f=value)
+
+
+async def test_fahrenheit_write_requires_matching_profile():
+    with pytest.raises(ValueError, match="profile"):
+        mutate_frame(default_frame(), time(12, 0), temperature_f=76)
+
+
+def test_fahrenheit_corpus_roundtrip():
+    import json
+    from pathlib import Path
+
+    records = json.loads(
+        Path("captures/live/2026-10-14-fahrenheit/packets.json").read_text()
+    )
+    for record in records:
+        if "decoded" in record:
+            assert (
+                decode_pulses(record["pulses_us"]).hex(" ").upper()
+                == record["decoded"]["hex"]
+            )
+        else:
+            with pytest.raises(ValueError):
+                decode_pulses(record["pulses_us"])

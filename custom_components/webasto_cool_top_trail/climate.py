@@ -22,11 +22,7 @@ async def async_setup_entry(hass, entry, async_add_entities) -> None:
 class WebastoClimate(WebastoEntity, ClimateEntity):
     _attr_assumed_state = True
     _attr_name = None
-    _attr_temperature_unit = UnitOfTemperature.CELSIUS
-    _attr_min_temp = 16
-    _attr_max_temp = 30
     _attr_target_temperature_step = 1
-    _attr_precision = 1
     _attr_hvac_modes = [
         HVACMode.OFF,
         HVACMode.COOL,
@@ -39,6 +35,22 @@ class WebastoClimate(WebastoEntity, ClimateEntity):
 
     def __init__(self, bridge) -> None:
         super().__init__(bridge, "climate")
+
+    @property
+    def temperature_unit(self):
+        return (
+            UnitOfTemperature.FAHRENHEIT
+            if self.bridge.state.get("remote_temperature_unit") == "F"
+            else UnitOfTemperature.CELSIUS
+        )
+
+    @property
+    def min_temp(self):
+        return 60 if self.temperature_unit == UnitOfTemperature.FAHRENHEIT else 16
+
+    @property
+    def max_temp(self):
+        return 86 if self.temperature_unit == UnitOfTemperature.FAHRENHEIT else 30
 
     @property
     def supported_features(self):
@@ -61,7 +73,11 @@ class WebastoClimate(WebastoEntity, ClimateEntity):
     def target_temperature(self):
         if self.hvac_mode == HVACMode.FAN_ONLY:
             return None
-        return self.bridge.state.get("target_temperature_c")
+        return self.bridge.state.get(
+            "target_temperature_f"
+            if self.temperature_unit == UnitOfTemperature.FAHRENHEIT
+            else "target_temperature_c"
+        )
 
     @property
     def current_temperature(self):
@@ -77,7 +93,7 @@ class WebastoClimate(WebastoEntity, ClimateEntity):
                 UnitOfTemperature.FAHRENHEIT,
             ):
                 return None
-            return TemperatureConverter.convert(value, unit, UnitOfTemperature.CELSIUS)
+            return TemperatureConverter.convert(value, unit, self.temperature_unit)
         except ValueError, TypeError:
             return None
 
@@ -104,11 +120,18 @@ class WebastoClimate(WebastoEntity, ClimateEntity):
         if ATTR_TEMPERATURE not in kwargs:
             raise HomeAssistantError("A single target temperature is required")
         value = kwargs[ATTR_TEMPERATURE]
-        if not math.isfinite(value) or not 16 <= value <= 30:
-            raise HomeAssistantError("Temperature must be between 16 and 30 C")
-        # HA converts the user's display units to native Celsius before this call.
-        # Quantize to the AC's 1 C step, including HA installations displaying F.
-        changes = {"temperature": math.floor(value + 0.5)}
+        if not math.isfinite(value) or not self.min_temp <= value <= self.max_temp:
+            raise HomeAssistantError(
+                f"Temperature must be between {self.min_temp} and "
+                f"{self.max_temp} {self.temperature_unit}"
+            )
+        # HA converts display units to the current remote profile before this call.
+        field = (
+            "temperature_f"
+            if self.temperature_unit == UnitOfTemperature.FAHRENHEIT
+            else "temperature"
+        )
+        changes = {field: math.floor(value + 0.5)}
         if "hvac_mode" in kwargs:
             changes["hvac_mode"] = kwargs["hvac_mode"]
         await self.bridge.async_send(**changes)

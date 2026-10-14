@@ -48,7 +48,7 @@ synchronizes the clock to Home Assistant local time and calculates both checksum
 
 | Entity | Controls / information |
 | --- | --- |
-| Climate | `off`, `cool`, `heat`, `dry`, `fan_only`, `heat_cool`; 16–30 °C, 1 °C steps; supported fan speeds; `none` / `sleep` presets |
+| Climate | `off`, `cool`, `heat`, `dry`, `fan_only`, `heat_cool`; 16–30 °C or 60–86 °F, native 1-degree steps; supported fan speeds; `none` / `sleep` presets |
 | Panel display switch | Air-distribution-panel display on/off |
 | Panel control lock switch | Panel touch controls locked/unlocked |
 | On timer / Off timer switches | Independent schedule enables; both can be enabled |
@@ -60,10 +60,9 @@ The remote's AUTO mode maps to HA `heat_cool` with **one setpoint**. Auto fan
 is distinct and supported in heat/cool. Dry uses low fan; fan-only has no target
 temperature. Sleep is enabled only during heat/cool. Louvers are manual: no
 swing entity. No ECO control or C/F display selector is exposed without enough
-local evidence. HA can display its own preferred units; changing temperature
-when the last remote frame uses Fahrenheit requires switching that remote to
-Celsius and sending a command first. The 24 °C → 76 °F observation rules out
-assuming ordinary conversion for that remote field.
+local evidence. Celsius and Fahrenheit remote profiles both support target edits.
+HA displays its preferred units while commands retain the learned remote profile.
+See the [Fahrenheit captures and conversion rules](captures/live/2026-10-14-fahrenheit/README.md).
 
 ## Documentation
 

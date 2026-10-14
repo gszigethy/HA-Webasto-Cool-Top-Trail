@@ -1,5 +1,6 @@
 """CARRIER_AC128 wire codec and conservative full-state command mutations."""
 
+import math
 from collections.abc import Sequence
 from datetime import time
 
@@ -126,6 +127,8 @@ def interpret_payload(payload: bytes) -> dict:
         "stored_operating_mode": mode,
         "fan_mode": FANS.get(payload[1] >> 4),
         "target_temperature_c": from_bcd(payload[6]),
+        "target_temperature_f": from_bcd(payload[11]) if payload[11] else None,
+        "remote_temperature_unit": "F" if payload[11] else "C",
         "clock": ":".join(f"{from_bcd(payload[index]):02}" for index in (3, 2, 14)),
         "power_flags": power_flags,
         "counter_nibble": payload[10] >> 4,
@@ -174,14 +177,15 @@ def timer_time(payload: bytes, on: bool) -> time:
 def mutate_frame(template: bytes, clock: time, **changes) -> bytes:
     """Preserve unknown fields and change only requested, supported settings.
 
-    Temperature writes require a Celsius-profile template: the remote's
-    Fahrenheit rounding and unit selection have not been sufficiently measured.
+    Temperature is expressed in Celsius; temperature_f explicitly selects a
+    Fahrenheit target without changing the remote display profile.
     Clock is refreshed with HA local time on every explicitly requested send.
     """
     parse_frame(template.hex())
     allowed = {
         "hvac_mode",
         "temperature",
+        "temperature_f",
         "fan_mode",
         "preset",
         "display",
@@ -210,23 +214,28 @@ def mutate_frame(template: bytes, clock: time, **changes) -> bytes:
         elif mode in ("fan_only", "heat_cool") and result[1] >> 4 == 1:
             result[1] = (result[1] & 15) | 0x20
     mode = "off" if result[10] & 15 == 12 else MODES[result[1] & 15]
-    if "temperature" in changes:
-        value = changes["temperature"]
+    if "temperature" in changes or "temperature_f" in changes:
+        fahrenheit = "temperature_f" in changes
+        if fahrenheit and ("temperature" in changes or not template[11]):
+            raise ValueError("Fahrenheit target requires a Fahrenheit profile")
+        value = changes["temperature_f" if fahrenheit else "temperature"]
+        minimum, maximum = (60, 86) if fahrenheit else (16, 30)
         if (
             isinstance(value, bool)
             or not isinstance(value, (int, float))
-            or not 16 <= value <= 30
+            or not minimum <= value <= maximum
             or int(value) != value
         ):
-            raise ValueError("Set an integer Celsius temperature from 16 to 30")
-        if template[11]:
-            raise ValueError(
-                "Switch the remote to Celsius and send a command "
-                "before changing temperature"
-            )
+            raise ValueError(f"Set an integer temperature from {minimum} to {maximum}")
         if mode == "fan_only":
             raise ValueError("Fan-only mode has no target temperature")
-        result[6] = to_bcd(int(value))
+        if fahrenheit:
+            result[11] = to_bcd(int(value))
+            result[6] = to_bcd(math.floor((value - 32) * 5 / 9 + 0.5))
+        else:
+            result[6] = to_bcd(int(value))
+            if template[11]:
+                result[11] = to_bcd(math.ceil(value * 9 / 5 + 32))
     if "fan_mode" in changes:
         fan = changes["fan_mode"]
         if fan not in FANS.values():

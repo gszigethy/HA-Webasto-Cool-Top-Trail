@@ -65,7 +65,10 @@ named fields; unrecognized names or values are rejected. Preserve reserved bits,
 unknown byte 7 bit 3, counter nibble, unimplemented ECO and untouched flags/time
 values. Power off changes the power nibble and retains stored mode/Sleep. Mode
 transitions apply the documented fan/Sleep constraints. Temperature changes
-modify byte 6 in a Celsius-profile frame; byte 11 nonzero prevents target writes.
+modify byte 6 in Celsius profiles. In Fahrenheit profiles, native Fahrenheit
+targets update byte 11 and set byte 6 to round((F−32)×5/9). Explicit Celsius
+codec requests retain the Fahrenheit profile using ceil(C×9/5+32). Unknown
+byte 7 flags remain untouched.
 Auxiliary flag changes use masks, never replace unrelated bits. Timer time edits
 preserve enable bits; enable edits preserve stored times.
 
@@ -87,7 +90,7 @@ checks semantic fields before accepting a state template. Malformed updates do
 not replace a valid template. Received payloads are immutable bytes; all entity
 properties read in-memory settings and do no I/O. Updates are push-driven, not
 polled. The optional temperature source is subscribed as an existing HA entity;
-numeric, finite °C/°F data is converted to native Celsius, otherwise unknown.
+numeric, finite °C/°F data is converted to the learned remote profile unit, otherwise unknown.
 
 The decoder deliberately does not trim extra pulses or repair malformed headers
 based on desired button labels. Rejected raw data remains in the research corpus.

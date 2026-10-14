@@ -107,7 +107,7 @@ All observations concern transmitted remote settings, not appliance feedback.
 | 8 | BCD timer-on minutes | Independently edited `00 → 01 → 00` |
 | 9 | BCD timer-off minutes | Independently edited `00 → 01 → 00` |
 | 10 | Counter high nibble; power low nibble | On `0x08`, off `0x0C`; counter always zero |
-| 11 | BCD Fahrenheit setpoint / profile indicator | Local 24 °C / 76 °F switch: `00 ↔ 76`; other temperatures untested |
+| 11 | BCD Fahrenheit setpoint / profile indicator | Zero in Celsius profiles; BCD Fahrenheit target otherwise, validated locally at 74–78 °F |
 | 12 | Eco flag `0x04` | Constant zero; reference only; Webasto capability unproven |
 | 13 | Panel touch-control lock `0x80`; display disabled `0x40` | Each bit independently toggled in live captures |
 | 14 | BCD clock seconds | Sequence agrees with the reference map |
@@ -174,7 +174,7 @@ See [technical design](technical-design.md) for mutation rules and transport.
 ## Remaining evidence gaps
 
 MVP modes/fans/power and auxiliary flags/timers are now locally corroborated.
-Further work: Fahrenheit setpoint mapping across the range, unknown byte 7 bit 3,
+Further work: full-range physical verification, unknown byte 7 bit 3,
 counter behavior, additional remote/model variants, exact clock-edit send trigger,
 and optical/appliance acceptance of synthesized commands. Repeated rapid commands
 and distinct higher timer digits would broaden the timing/BCD evidence.
@@ -225,9 +225,15 @@ auxiliary fields. Air-conditioner responses are not yet physically verified.
 
 `custom_components/webasto_cool_top_trail/protocol.py` supplies validated full-state
 mutations for all corroborated modes, fans and auxiliaries. It preserves unknown
-bits/counter and rejects unsupported Fahrenheit target edits. The earlier
+bits/counter and supports Celsius and Fahrenheit target edits. The earlier
 research builder above remains intentionally limited to its baseline profile.
 `esp32/webasto_ir.h` implements the same wire codec for ESPHome RX/TX, tested with
 all archived waveforms. `bridge.example.yaml` exposes native frame actions and
 sensors; it never emits commands on boot. [Entity reference](entity-map.md),
 [FD](functional-design.md) and [TD](technical-design.md) describe runtime policies.
+
+## Fahrenheit target support
+
+See the [2026-10-14 capture evidence](../captures/live/2026-10-14-fahrenheit/README.md)
+for decoded 74–78 °F values, C/F switches, rounding rules and measurement limits.
+Native Fahrenheit edits update both temperature fields and both checksums.

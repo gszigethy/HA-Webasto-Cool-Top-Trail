@@ -33,5 +33,5 @@ class WebastoStatus(WebastoEntity, SensorEntity):
             "last_command": self.bridge.last_command,
             "appliance_feedback": False,
             "frame": self.bridge.frame.hex(" ").upper() if self.bridge.frame else None,
-            "fahrenheit_temperature_edits_supported": False,
+            "fahrenheit_temperature_edits_supported": True,
         }

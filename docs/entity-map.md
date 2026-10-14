@@ -28,7 +28,7 @@ acknowledgment. No separate power switch or fan entity duplicates climate contro
 | --- | --- |
 | HVAC | `off`, `cool`, `heat`, `dry`, `fan_only`, `heat_cool` |
 | Remote AUTO | HA `heat_cool`, automatic heat/cool selection with one target; not HA's schedule/AI `auto` |
-| Target | 16–30 °C, 1 °C native step; rounded to nearest integer after HA display-unit conversion |
+| Target | 16–30 °C or 60–86 °F, native 1-degree step; rounded to nearest integer after HA display-unit conversion |
 | Fan | `auto`, `low`, `medium`, `high` in heat/cool; low only in dry; low/medium/high in fan-only or heat_cool |
 | Sleep | Standard `sleep`/`none` climate preset; enabling requires active heat/cool |
 | Turn off/on | Power flag changed; stored operating mode retained/resumed |
@@ -45,8 +45,8 @@ Fan-only target is hidden while its stored value is preserved in the packet.
 Unsupported modes, fans, presets and timer seconds are rejected before transmit.
 
 Fahrenheit-profile frames are decoded and preserved for power/fan/mode/auxiliary
-changes. Changing their target is rejected with a Celsius instruction because
-that remote's F mapping is insufficiently measured. There is no C/F selector,
+changes, including target edits in native 1 °F steps (60–86 °F).
+Celsius profiles use 1 °C steps (16–30 °C). HA converts its preferred display units. There is no C/F selector,
 ECO preset, swing control, remote battery sensor, energy sensor, or fault sensor.
 Lock is a configuration switch for panel controls, rather than a door/security
 lock entity. Timer enables are independent boolean settings, avoiding a select
