@@ -14,7 +14,7 @@ reloads and entry-title changes; creating another entry gives it independent ide
 | `switch.caravan_ac_off_timer` | Switch / configuration | Enable OFF schedule |
 | `time.caravan_ac_on_time` | Time / configuration | Local ON time HH:MM |
 | `time.caravan_ac_off_time` | Time / configuration | Local OFF time HH:MM |
-| `sensor.caravan_ac_protocol_status` | Enum sensor / diagnostic | `awaiting_frame`, `ready`, `disconnected` |
+| `sensor.caravan_ac_protocol_status` | Enum sensor / diagnostic | `ready`, `disconnected` |
 
 The ESPHome device additionally exposes a Transmitted IR frame diagnostic
 sensor and, with a receiver, a Received IR frame sensor. Those are transport endpoints, not duplicate climate

@@ -191,8 +191,9 @@ Go to **Settings → Devices & services → Add integration → Webasto Cool Top
 
 ### Step 5: First use
 
-- **With a receiver:** point the handheld remote at the receiver and press any button once. Home Assistant takes over the remote's settings and the controls become available.
-- **Without a receiver:** the controls are available right away. They start from default settings: off, cool, 24 °C, auto fan. Nothing is sent until you use a control.
+The controls are available right away, with or without a receiver. They start from default settings: **off, heat/cool, 22 °C, high fan**. Nothing is sent until you use a control.
+
+With a receiver, whenever someone uses the handheld remote, Home Assistant picks up the remote's settings automatically.
 
 Now try turning the AC on from Home Assistant and check that the AC responds.
 
@@ -208,7 +209,6 @@ Now try turning the AC on from Home Assistant and check that the AC responds.
 | --- | --- |
 | Setup says the device has no `send_frame` action | The ESP32 is online and was installed with the example YAML above |
 | Controls are unavailable / **Bridge disconnected** | The ESP32's power and Wi-Fi |
-| Status says **Awaiting remote frame** | Press a button on the handheld remote, pointed at the receiver |
 | Home Assistant changes but the AC doesn't | The transmitter pin, wiring, and that the IR LED points at the AC |
 
 More help: [installation guide](docs/installation.md#if-something-does-not-work).

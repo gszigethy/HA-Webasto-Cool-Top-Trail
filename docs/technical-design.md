@@ -24,7 +24,8 @@ HA configuration binds one ESPHome device, plus an optional room-temperature
 source. `discovery.py` resolves it at each setup: the action is
 `esphome.<node>_send_frame`, using the node name stored by the ESPHome entry and
 the ESPHome integration's naming; the receiver is the device's sensor whose
-original name is `Received IR frame`. Without one, the default profile is used.
+original name is `Received IR frame` (optional). The default profile applies
+until a frame is saved or received, with or without a receiver.
 The device ID is the entry's unique ID, so renaming entities cannot create
 duplicates. Changing the bridge firmware's entities requires a reload.
 
@@ -124,7 +125,7 @@ template restores without transmit. A replay of the same last receiver value is
 ignored, preventing stale ESPHome sensor state from undoing a later HA command.
 A new valid received value supersedes restored state. Consecutive exact duplicates
 are ignored; normal remote frames include advancing seconds and thus differ.
-Corrupt stored data is ignored and learning/default initialization is required.
+Corrupt stored data is ignored and the default profile is used.
 Removing the entry removes its saved template.
 
 Entity unique IDs are `<entry_id>_<function>` and device identifiers are
@@ -136,9 +137,9 @@ Reconfigure.
 Availability combines a registered send action with at least one of the device's
 ESPHome entities not being unavailable: ESPHome keeps actions registered while a
 node is offline, but marks all its entities unavailable. Unknown sensor state is
-normal before any frame. A valid saved/learned/default template is also required
-for controls. Native-API errors remain authoritative during calls. Protocol
-status stays available to explain missing readiness. No command is queued for a
+normal before any frame. A saved, received or default template always exists, so
+connectivity alone decides availability. Native-API errors remain authoritative
+during calls. Protocol status stays available to explain disconnects. No command is queued for a
 future reconnect.
 
 ## Validation, dependencies and compatibility

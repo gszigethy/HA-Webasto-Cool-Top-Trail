@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Webasto Cool Top Trail",
-        "description": "Pair the IR bridge with the built-in ESPHome integration first, then select it here. If the bridge has an IR receiver, press any button on the physical remote once to load the current settings. Without a receiver, controls start from default settings: off, cool, 24 °C, auto fan, display on, unlocked, Sleep and timers off; the first command you send applies that complete profile. IR provides no appliance feedback; room temperature is optional.",
+        "description": "Pair the IR bridge with the built-in ESPHome integration first, then select it here. Controls are available right away, starting from default settings: off, heat/cool, 22 °C, high fan. If the bridge has an IR receiver, settings made with the handheld remote are picked up automatically. IR provides no appliance feedback; room temperature is optional.",
         "data": {
           "name": "Name",
           "device_id": "ESPHome IR bridge",
@@ -12,7 +12,7 @@
       },
       "reconfigure": {
         "title": "Webasto Cool Top Trail",
-        "description": "Pair the IR bridge with the built-in ESPHome integration first, then select it here. If the bridge has an IR receiver, press any button on the physical remote once to load the current settings. Without a receiver, controls start from default settings: off, cool, 24 °C, auto fan, display on, unlocked, Sleep and timers off; the first command you send applies that complete profile. IR provides no appliance feedback; room temperature is optional.",
+        "description": "Pair the IR bridge with the built-in ESPHome integration first, then select it here. Controls are available right away, starting from default settings: off, heat/cool, 22 °C, high fan. If the bridge has an IR receiver, settings made with the handheld remote are picked up automatically. IR provides no appliance feedback; room temperature is optional.",
         "data": {
           "name": "Name",
           "device_id": "ESPHome IR bridge",
@@ -56,7 +56,6 @@
       "protocol_status": {
         "name": "Protocol status",
         "state": {
-          "awaiting_frame": "Awaiting remote frame",
           "ready": "Ready",
           "disconnected": "Bridge disconnected"
         }

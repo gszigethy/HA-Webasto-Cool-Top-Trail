@@ -294,13 +294,14 @@ def mutate_frame(template: bytes, clock: time, **changes) -> bytes:
 
 
 def default_frame() -> bytes:
-    """Explicit opt-in starting settings for a transmitter without an IR receiver.
+    """Starting settings used until a remote frame is received.
 
-    This is a requested template, not an observation: off, cool, auto fan, 24 C,
-    panel on/unlocked, sleep off, timer enables clear, unknown bits zero.
+    This is a requested template, not an observation: off, heat/cool, 22 C, high
+    fan (the remote's AUTO mode uses high, never auto fan), panel on/unlocked,
+    sleep off, timer enables clear, unknown bits zero.
     """
     result = bytearray(
-        [0x16, 0x12, 0, 0, 0x09, 0x10, 0x24, 0, 0, 0, 0x0C, 0, 0, 0, 0, 0]
+        [0x16, 0x2A, 0, 0, 0x09, 0x10, 0x22, 0, 0, 0, 0x0C, 0, 0, 0, 0, 0]
     )
     for start in (0, 8):
         result[start + 7] = checksum(bytes(result[start : start + 8])) << 4
