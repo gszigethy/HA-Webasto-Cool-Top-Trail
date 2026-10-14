@@ -4,17 +4,19 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryError
 
-from .const import CONF_RECEIVER, CONF_SEND_SERVICE, PLATFORMS
+from .const import CONF_DEVICE, PLATFORMS
 from .coordinator import WebastoBridge
+from .discovery import find_endpoints
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Load local transport listeners and entity platforms; never transmit on setup."""
-    if not entry.data.get(CONF_RECEIVER) or not entry.data.get(CONF_SEND_SERVICE):
+    endpoints = find_endpoints(hass, entry.data.get(CONF_DEVICE, ""))
+    if endpoints is None:
         raise ConfigEntryError(
-            "Reconfigure this entry to select an ESPHome receiver and send action"
+            "The selected ESPHome device was not found; reconfigure this entry"
         )
-    entry.runtime_data = WebastoBridge(hass, entry)
+    entry.runtime_data = WebastoBridge(hass, entry, endpoints)
     await entry.runtime_data.async_setup()
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
@@ -25,13 +27,6 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         await entry.runtime_data.async_close()
         return True
     return False
-
-
-async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Retain scaffold identity; require UI reconfiguration to attach hardware."""
-    if entry.version == 1:
-        hass.config_entries.async_update_entry(entry, version=2)
-    return entry.version == 2
 
 
 async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:

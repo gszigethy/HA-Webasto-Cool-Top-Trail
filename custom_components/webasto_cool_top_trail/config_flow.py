@@ -1,60 +1,32 @@
-"""Select existing ESPHome native-API entities and actions through the UI."""
+"""Select an existing ESPHome bridge device through the UI."""
 
 from typing import Any
 
-import probatio
 import voluptuous as vol
 from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
 from homeassistant.const import CONF_NAME
 from homeassistant.helpers import selector
 
-from .const import (
-    CONF_RECEIVER,
-    CONF_SEND_SERVICE,
-    CONF_TEMPERATURE_SENSOR,
-    CONF_USE_DEFAULT_STATE,
-    DEFAULT_NAME,
-    DOMAIN,
-)
+from .const import CONF_DEVICE, CONF_TEMPERATURE_SENSOR, DEFAULT_NAME, DOMAIN
+from .discovery import find_endpoints
 
 
 class WebastoConfigFlow(ConfigFlow, domain=DOMAIN):
-    """Create or reconfigure one full-frame bridge per receiver entity."""
+    """Create or reconfigure one full-frame bridge per ESPHome device."""
 
-    VERSION = 2
+    VERSION = 1
 
     def _schema(self, defaults: dict) -> vol.Schema:
-        services = [
-            f"esphome.{name}"
-            for name in self.hass.services.async_services_for_domain("esphome")
-            if name.endswith("send_frame")
-        ]
         return vol.Schema(
             {
                 vol.Required(
                     CONF_NAME, default=defaults.get(CONF_NAME, DEFAULT_NAME)
                 ): str,
                 vol.Required(
-                    CONF_RECEIVER, default=defaults.get(CONF_RECEIVER, vol.UNDEFINED)
-                ): selector.EntitySelector(
-                    selector.EntitySelectorConfig(
-                        domain="sensor", integration="esphome"
-                    )
+                    CONF_DEVICE, default=defaults.get(CONF_DEVICE, vol.UNDEFINED)
+                ): selector.DeviceSelector(
+                    selector.DeviceSelectorConfig(integration="esphome")
                 ),
-                vol.Required(
-                    CONF_SEND_SERVICE,
-                    default=defaults.get(CONF_SEND_SERVICE, vol.UNDEFINED),
-                ): selector.SelectSelector(
-                    selector.SelectSelectorConfig(
-                        options=services,
-                        custom_value=True,
-                        mode=selector.SelectSelectorMode.DROPDOWN,
-                    )
-                ),
-                vol.Optional(
-                    CONF_USE_DEFAULT_STATE,
-                    default=defaults.get(CONF_USE_DEFAULT_STATE, False),
-                ): selector.BooleanSelector(),
                 vol.Optional(
                     CONF_TEMPERATURE_SENSOR,
                     description={
@@ -68,19 +40,11 @@ class WebastoConfigFlow(ConfigFlow, domain=DOMAIN):
             }
         )
 
-    def _valid_service(self, value: str) -> bool:
-        if not value.startswith("esphome."):
-            return False
-        action = self.hass.services.async_services_for_domain("esphome").get(
-            value.removeprefix("esphome.")
+    def _is_bridge(self, device_id: str) -> bool:
+        endpoints = find_endpoints(self.hass, device_id)
+        return endpoints is not None and self.hass.services.has_service(
+            "esphome", endpoints.service
         )
-        if action is None or action.schema is None:
-            return False
-        try:
-            validated = action.schema({"frame": ""})
-        except vol.Invalid, probatio.Invalid:
-            return False
-        return isinstance(validated, dict) and validated.get("frame") == ""
 
     async def _configure(self, user_input, reconfigure=False) -> ConfigFlowResult:
         errors = {}
@@ -89,15 +53,12 @@ class WebastoConfigFlow(ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             data = dict(user_input)
             data[CONF_NAME] = data[CONF_NAME].strip()
-            data[CONF_SEND_SERVICE] = data[CONF_SEND_SERVICE].strip()
             if not data[CONF_NAME]:
                 errors[CONF_NAME] = "invalid_name"
-            elif not self._valid_service(data[CONF_SEND_SERVICE]):
-                errors[CONF_SEND_SERVICE] = "invalid_service"
-            elif not self.hass.states.get(data[CONF_RECEIVER]):
-                errors[CONF_RECEIVER] = "invalid_receiver"
+            elif not self._is_bridge(data[CONF_DEVICE]):
+                errors[CONF_DEVICE] = "not_bridge"
             elif any(
-                e.data.get(CONF_RECEIVER) == data[CONF_RECEIVER]
+                e.data.get(CONF_DEVICE) == data[CONF_DEVICE]
                 and (not entry or e.entry_id != entry.entry_id)
                 for e in self._async_current_entries()
             ):
@@ -106,11 +67,11 @@ class WebastoConfigFlow(ConfigFlow, domain=DOMAIN):
                 if entry:
                     return self.async_update_reload_and_abort(
                         entry,
-                        unique_id=data[CONF_RECEIVER],
+                        unique_id=data[CONF_DEVICE],
                         title=data[CONF_NAME],
                         data=data,
                     )
-                await self.async_set_unique_id(data[CONF_RECEIVER])
+                await self.async_set_unique_id(data[CONF_DEVICE])
                 self._abort_if_unique_id_configured()
                 return self.async_create_entry(title=data[CONF_NAME], data=data)
         return self.async_show_form(
