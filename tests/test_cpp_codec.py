@@ -53,7 +53,7 @@ int main() {
             "-Werror",
             "-fsanitize=undefined",
             "-I",
-            str(ROOT / "esp32"),
+            str(ROOT / "components" / "webasto_ir"),
             str(source),
             "-o",
             str(binary),

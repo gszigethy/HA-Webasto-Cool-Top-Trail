@@ -4,8 +4,10 @@
 
 - Fetch the ESPHome IR codec automatically from GitHub as an external component;
   no header file needs to be placed manually.
-- One self-contained device YAML (`esp32/bridge.example.yaml`) with the sending
-  action, sensors and optional receiver; no remote YAML packages.
+- One self-contained device YAML (`esp32/example.yaml`) with the sending
+  action, sensors and optional receiver; no remote YAML packages and no
+  separate secrets, receiver or bridge YAML files. Research YAML moved to
+  `captures/`.
 - Simpler, beginner-friendly README with the full device YAML.
 
 

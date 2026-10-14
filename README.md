@@ -41,28 +41,26 @@ Infrared only goes one way. The AC never reports back, so Home Assistant shows t
 
 ### Step 1: Set up the ESP32
 
-1. In **ESPHome Device Builder**, create a new device and open its YAML editor.
-2. Copy the API encryption key from the generated YAML (`api: encryption: key:`) and keep it for step 4.
-3. Replace the whole YAML with the template below. It is also on GitHub: **[esp32/bridge.example.yaml](https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail/blob/main/esp32/bridge.example.yaml)**.
-4. Open **Secrets** (top right in Device Builder) and add your Wi-Fi details and the key from point 2:
-
-   ```yaml
-   caravan_wifi_ssid: "YOUR_WIFI_NAME"
-   caravan_wifi_password: "YOUR_WIFI_PASSWORD"
-   api_encryption_key: "THE_KEY_FROM_POINT_2"
-   ```
-
-5. Edit the top of the template to match your hardware (see below), then click **Install**. The first install usually needs a USB cable; later updates work over Wi-Fi.
+1. In **ESPHome Device Builder**, create a new device and open its YAML editor. Copy the `key:` value under `api:` → `encryption:` before replacing anything.
+2. Replace the whole YAML with the example below (also on GitHub: **[esp32/example.yaml](https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail/blob/main/esp32/example.yaml)**).
+3. Follow the comments in it: change the pins and board, and remove the receiver parts if you have no IR receiver.
+4. Open **Secrets** in Device Builder and make sure it has `wifi_ssid`, `wifi_password` and `api_encryption_key`. Use the key you copied in point 1 for `api_encryption_key`.
+5. Click **Install**. The first install usually needs a USB cable; later updates work over Wi-Fi.
 
 ```yaml
-# ESPHome bridge for the Webasto Cool Top Trail Home Assistant integration.
-# Paste into ESPHome Device Builder, then set the pins and board for your hardware.
-# Without an IR receiver, delete the two parts marked "Only with an IR receiver".
+# Webasto Cool Top Trail IR bridge for Home Assistant.
+# Paste this into ESPHome Device Builder, then:
+#   1. CHANGE the pins and the board below to match your hardware.
+#   2. No IR receiver? REMOVE the two parts marked "Only with an IR receiver".
+#   3. Add wifi_ssid, wifi_password and api_encryption_key under Secrets in
+#      Device Builder (use the API key Device Builder generated for this device).
+# Keep the send_frame action and sensor names: the integration finds them by name.
+
 substitutions:
-  device_name: webasto-ir-bridge
-  friendly_name: Webasto IR Bridge
-  transmitter_pin: GPIO26
-  receiver_pin: GPIO32
+  device_name: webasto-ir-bridge       # CHANGE if you like: network name
+  friendly_name: Webasto IR Bridge     # CHANGE if you like: name shown in Home Assistant
+  transmitter_pin: GPIO26              # CHANGE: GPIO of your IR LED
+  receiver_pin: GPIO32                 # CHANGE: GPIO of your IR receiver
 
 esphome:
   name: ${device_name}
@@ -70,11 +68,11 @@ esphome:
   min_version: 2026.9.1
 
 esp32:
-  board: esp32dev
+  board: esp32dev                      # CHANGE: your board, e.g. m5stack-atom
   framework:
     type: esp-idf
 
-# Downloads only the IR codec (webasto_ir.h); everything else is in this file.
+# Downloads only the IR codec (webasto_ir.h) from GitHub. Nothing else is fetched.
 external_components:
   - source: github://gszigethy/HA-Webasto-Cool-Top-Trail@main
     components: [webasto_ir]
@@ -82,11 +80,10 @@ external_components:
 webasto_ir:
 
 wifi:
-  ssid: !secret caravan_wifi_ssid
-  password: !secret caravan_wifi_password
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
 
 logger:
-  level: INFO
 
 ota:
   - platform: esphome
@@ -94,10 +91,8 @@ ota:
 api:
   encryption:
     key: !secret api_encryption_key
-  # Keep running when Home Assistant is out of reach (e.g. while travelling).
-  reboot_timeout: 0s
+  reboot_timeout: 0s                   # Keep running when Home Assistant is out of reach.
   actions:
-    # Keep this name: the integration looks for <device_name>_send_frame.
     - action: send_frame
       variables:
         frame: string
@@ -115,7 +110,7 @@ api:
                   call.get_data()->set_data(webasto_ir::encode(bytes));
                   call.get_data()->set_carrier_frequency(38000);
                   call.perform();
-              # Longest frame is 251ms; acknowledge after the RMT completion callback.
+              # Longest frame is 251 ms; report the result once it has been sent.
               - delay: 300ms
               - if:
                   condition:
@@ -143,21 +138,20 @@ remote_transmitter:
   carrier_duty_percent: 50%
   non_blocking: true
 
-# Keep these names: the integration finds the sensors by name.
 text_sensor:
   - platform: template
     id: transmitted_frame
     name: Transmitted IR frame
     entity_category: diagnostic
     update_interval: never
-  # --- Only with an IR receiver ---
+  # --- Only with an IR receiver: remove this sensor if you have none ---
   - platform: template
     id: received_frame
     name: Received IR frame
     entity_category: diagnostic
     update_interval: never
 
-# --- Only with an IR receiver ---
+# --- Only with an IR receiver: remove this whole section if you have none ---
 remote_receiver:
   id: receiver_ir
   pin:
@@ -175,22 +169,11 @@ remote_receiver:
             id(received_frame).publish_state(webasto_ir::format(bytes));
 ```
 
-**What to change:**
-
-| Setting | Change it to |
-| --- | --- |
-| `transmitter_pin` | The GPIO your IR LED is connected to |
-| `receiver_pin` | The GPIO your IR receiver is connected to |
-| `board` | Your ESP32 board, for example `m5stack-atom` |
-| `device_name`, `friendly_name` | Optional: the device's network name and display name |
-
-**No IR receiver?** Delete the two parts marked *Only with an IR receiver*: the **Received IR frame** sensor and the `remote_receiver:` section.
-
-You don't need to download any other file. When you install, ESPHome fetches the IR codec (`webasto_ir.h`) from this repository through `external_components:`; everything else is in this one YAML. Keep the `send_frame` action name and the *IR frame* sensor names: the integration finds them by name.
+ESPHome downloads only the IR codec (`webasto_ir.h`) from this repository, through `external_components:`. Everything else is in this one file, and you don't place any file manually.
 
 ### Step 2: Add the ESP32 to Home Assistant
 
-Go to **Settings → Devices & services**. The ESP32 usually appears as a discovered **ESPHome** device; click **Add**. If it doesn't, choose **Add integration → ESPHome** and enter its IP address. Use the encryption key from step 1 if asked.
+Go to **Settings → Devices & services**. The ESP32 usually appears as a discovered **ESPHome** device; click **Add**. If it doesn't, choose **Add integration → ESPHome** and enter its IP address. Use the API encryption key from step 1 if asked.
 
 ### Step 3: Install this integration
 
@@ -223,7 +206,7 @@ Now try turning the AC on from Home Assistant and check that the AC responds.
 
 | Problem | What to check |
 | --- | --- |
-| Setup says the device has no `send_frame` action | The ESP32 is online and was installed with the template above |
+| Setup says the device has no `send_frame` action | The ESP32 is online and was installed with the example YAML above |
 | Controls are unavailable / **Bridge disconnected** | The ESP32's power and Wi-Fi |
 | Status says **Awaiting remote frame** | Press a button on the handheld remote, pointed at the receiver |
 | Home Assistant changes but the AC doesn't | The transmitter pin, wiring, and that the IR LED points at the AC |

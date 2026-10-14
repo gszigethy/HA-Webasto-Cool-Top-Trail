@@ -66,11 +66,19 @@ jobs:
         with:
           python-version: "3.14"
       - run: python -m pip install esphome==2026.9.1
-      - name: Validate sanitized examples without contacting devices
+      - name: Validate ESPHome YAML without contacting devices
         run: |
-          cp esp32/secrets.example.yaml esp32/secrets.yaml
-          esphome config esp32/baseline.yaml > /dev/null
-          esphome config esp32/receiver.example.yaml > /dev/null
-          esphome config esp32/bridge.example.yaml > /dev/null
-      - name: Compile bridge firmware (never upload)
-        run: esphome compile esp32/bridge.example.yaml
+          # Placeholder secrets for validation only.
+          for dir in esp32 captures/baseline; do
+            printf '%s\n' \
+              'wifi_ssid: "example"' 'wifi_password: "example-password"' \
+              'caravan_wifi_ssid: "example"' 'caravan_wifi_password: "example-password"' \
+              'iot_wifi_ssid: "example"' 'iot_wifi_password: "example-password"' \
+              'api_encryption_key: "AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE="' \
+              > "$dir/secrets.yaml"
+          done
+          esphome config captures/baseline/baseline.yaml > /dev/null
+          esphome config captures/capture-firmware.yaml > /dev/null
+          esphome config esp32/example.yaml > /dev/null
+      - name: Compile the example firmware (never upload)
+        run: esphome compile esp32/example.yaml

@@ -6,7 +6,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
 
-# Names from esp32/bridge.example.yaml; ESPHome keeps them as original names.
+# Names from esp32/example.yaml; ESPHome keeps them as original names.
 RECEIVED_FRAME_NAME = "Received IR frame"
 SEND_ACTION = "send_frame"
 

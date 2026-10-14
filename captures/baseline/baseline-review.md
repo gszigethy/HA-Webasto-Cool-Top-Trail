@@ -46,8 +46,8 @@ and [protocol analysis](../docs/ir-protocol.md).
 
 ## Local validation
 
-Copy `secrets.example.yaml` to the ignored `secrets.yaml` only for validation,
-then run `esphome config esp32/baseline.yaml` from the repository root. The example
+Create an ignored `secrets.yaml` beside it with placeholder values only for validation,
+then run `esphome config captures/baseline/baseline.yaml` from the repository root. The example
 key/passwords are publicly known test placeholders. Configure your own secrets,
 node identity, and network settings before deployment.
 

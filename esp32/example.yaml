@@ -1,11 +1,16 @@
-# ESPHome bridge for the Webasto Cool Top Trail Home Assistant integration.
-# Paste into ESPHome Device Builder, then set the pins and board for your hardware.
-# Without an IR receiver, delete the two parts marked "Only with an IR receiver".
+# Webasto Cool Top Trail IR bridge for Home Assistant.
+# Paste this into ESPHome Device Builder, then:
+#   1. CHANGE the pins and the board below to match your hardware.
+#   2. No IR receiver? REMOVE the two parts marked "Only with an IR receiver".
+#   3. Add wifi_ssid, wifi_password and api_encryption_key under Secrets in
+#      Device Builder (use the API key Device Builder generated for this device).
+# Keep the send_frame action and sensor names: the integration finds them by name.
+
 substitutions:
-  device_name: webasto-ir-bridge
-  friendly_name: Webasto IR Bridge
-  transmitter_pin: GPIO26
-  receiver_pin: GPIO32
+  device_name: webasto-ir-bridge       # CHANGE if you like: network name
+  friendly_name: Webasto IR Bridge     # CHANGE if you like: name shown in Home Assistant
+  transmitter_pin: GPIO26              # CHANGE: GPIO of your IR LED
+  receiver_pin: GPIO32                 # CHANGE: GPIO of your IR receiver
 
 esphome:
   name: ${device_name}
@@ -13,11 +18,11 @@ esphome:
   min_version: 2026.9.1
 
 esp32:
-  board: esp32dev
+  board: esp32dev                      # CHANGE: your board, e.g. m5stack-atom
   framework:
     type: esp-idf
 
-# Downloads only the IR codec (webasto_ir.h); everything else is in this file.
+# Downloads only the IR codec (webasto_ir.h) from GitHub. Nothing else is fetched.
 external_components:
   - source: github://gszigethy/HA-Webasto-Cool-Top-Trail@main
     components: [webasto_ir]
@@ -25,11 +30,10 @@ external_components:
 webasto_ir:
 
 wifi:
-  ssid: !secret caravan_wifi_ssid
-  password: !secret caravan_wifi_password
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
 
 logger:
-  level: INFO
 
 ota:
   - platform: esphome
@@ -37,10 +41,8 @@ ota:
 api:
   encryption:
     key: !secret api_encryption_key
-  # Keep running when Home Assistant is out of reach (e.g. while travelling).
-  reboot_timeout: 0s
+  reboot_timeout: 0s                   # Keep running when Home Assistant is out of reach.
   actions:
-    # Keep this name: the integration looks for <device_name>_send_frame.
     - action: send_frame
       variables:
         frame: string
@@ -58,7 +60,7 @@ api:
                   call.get_data()->set_data(webasto_ir::encode(bytes));
                   call.get_data()->set_carrier_frequency(38000);
                   call.perform();
-              # Longest frame is 251ms; acknowledge after the RMT completion callback.
+              # Longest frame is 251 ms; report the result once it has been sent.
               - delay: 300ms
               - if:
                   condition:
@@ -86,21 +88,20 @@ remote_transmitter:
   carrier_duty_percent: 50%
   non_blocking: true
 
-# Keep these names: the integration finds the sensors by name.
 text_sensor:
   - platform: template
     id: transmitted_frame
     name: Transmitted IR frame
     entity_category: diagnostic
     update_interval: never
-  # --- Only with an IR receiver ---
+  # --- Only with an IR receiver: remove this sensor if you have none ---
   - platform: template
     id: received_frame
     name: Received IR frame
     entity_category: diagnostic
     update_interval: never
 
-# --- Only with an IR receiver ---
+# --- Only with an IR receiver: remove this whole section if you have none ---
 remote_receiver:
   id: receiver_ir
   pin:

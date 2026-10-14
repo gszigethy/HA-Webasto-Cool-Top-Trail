@@ -14,7 +14,7 @@ FRAME = "16 18 41 21 09 10 24 80 00 00 08 00 00 00 59 60"
 
 
 def add_esphome_bridge(hass, name="Caravan AC", frame=FRAME, receiver=True):
-    """Register an ESPHome node like bridge.example.yaml: device, sensors, action."""
+    """Register an ESPHome node like esp32/example.yaml: device, sensors, action."""
     suffix = name.lower().replace(" ", "_")
     node = f"{suffix.replace('_', '-')}-bridge"
     esphome = MockConfigEntry(
