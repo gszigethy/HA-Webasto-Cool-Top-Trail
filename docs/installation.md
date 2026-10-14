@@ -76,7 +76,7 @@ Also check the `esp32` board setting against your board. The example uses `esp32
 
 **If you have no receiver:** delete the entire `remote_receiver:` section, including its indented contents. Keep the `text_sensor:` section, both sensors inside it, and the `api:` sending action. The unused `receiver_pin` substitution can be removed too.
 
-**If updating an existing ESPHome device:** merge the example's IR code and sending action into your configuration. Do not paste duplicate top-level `api:`, `esphome:`, or other sections; add their contents to the sections you already have. Stop using the old fixed-command buttons or automations to control the AC once you switch to the new climate control.
+**If updating an existing ESPHome device:** merge the example's IR code and sending action into your configuration. Do not paste duplicate top-level `api:`, `esphome:`, or other sections; add their contents to the sections you already have. Also keep `reboot_timeout: 0s` under your `api:` section. Stop using the old fixed-command buttons or automations to control the AC once you switch to the new climate control.
 
 ### Add Wi-Fi details and an encryption key
 
