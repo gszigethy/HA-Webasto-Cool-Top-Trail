@@ -104,10 +104,15 @@ class WebastoClimate(WebastoEntity, ClimateEntity):
     @property
     def fan_modes(self):
         if self.hvac_mode == HVACMode.DRY:
-            return ["low"]
-        if self.hvac_mode in (HVACMode.FAN_ONLY, HVACMode.HEAT_COOL):
-            return ["low", "medium", "high"]
-        return ["auto", "low", "medium", "high"]
+            modes = ["low"]
+        elif self.hvac_mode in (HVACMode.FAN_ONLY, HVACMode.HEAT_COOL):
+            modes = ["low", "medium", "high"]
+        else:
+            modes = ["auto", "low", "medium", "high"]
+        # Show a received combination outside these rules rather than hiding it.
+        if self.fan_mode and self.fan_mode not in modes:
+            modes = [self.fan_mode, *modes]
+        return modes
 
     @property
     def preset_mode(self):

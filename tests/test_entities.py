@@ -8,6 +8,7 @@ import pytest
 from homeassistant.exceptions import HomeAssistantError
 
 from custom_components.webasto_cool_top_trail.protocol import (
+    checksum,
     default_frame,
     interpret_payload,
     mutate_frame,
@@ -226,3 +227,18 @@ async def test_fahrenheit_profile_display_and_commands(hass, fahrenheit_display)
     assert entry.runtime_data.frame[11] == 0x78
     assert entry.runtime_data.frame[6] == 0x26
     assert send.call_count == 1
+
+
+async def test_received_fan_outside_mode_rules_is_shown(hass):
+    # Fan-only with auto fan: valid wire data that HA itself would not produce.
+    frame = bytearray(bytes.fromhex(FRAME.replace(" ", "")))
+    frame[1] = 0x14
+    for start in (0, 8):
+        frame[start + 7] = (checksum(bytes(frame[start : start + 8])) << 4) | (
+            frame[start + 7] & 15
+        )
+    await setup_bridge(hass, frame=frame.hex(" ").upper())
+    state = hass.states.get("climate.caravan_ac")
+    assert state.state == "fan_only"
+    assert state.attributes["fan_mode"] == "auto"
+    assert state.attributes["fan_modes"] == ["auto", "low", "medium", "high"]
