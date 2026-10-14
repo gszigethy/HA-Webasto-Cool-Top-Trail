@@ -1,48 +1,37 @@
 # Changelog
 
-## 0.1.0 — development implementation
+## 1.0.0 beta 1 — 2026-10-14
 
-- Implement HACS climate, auxiliary switches/time entities, clock button and
-  readiness diagnostics over ESPHome native API.
-- Add conservative full-state codec preserving unknown and untouched fields.
-- Add complete ESPHome bridge with validated RX/TX, API status responses and
-  optional transmitter-only starting settings.
-- Add lifecycle, service, concurrency, persistence, invalid-input and C++ capture
-  replay tests; compile the bridge in CI.
-- Document setup, entities, functional/technical design, protocol evidence and
-  physical acceptance boundaries. No live HA writes or firmware deployment.
-- Fahrenheit-profile target writes remain blocked pending further measurements.
+First public prerelease for Houghton-made Webasto Cool Top Trail air conditioners.
 
+- HACS installation and setup by selecting an existing ESPHome bridge device.
+- One climate entity for on/off, cool, heat, dry, fan-only, automatic heat/cool,
+  target temperature, fan speed and Sleep.
+- Native Celsius and Fahrenheit targets, with capture-backed conversion rules.
+- Panel display and control lock switches, independent ON/OFF timer switches,
+  and schedule time entities. Every explicit command refreshes the appliance clock.
+- Full-state CARRIER_AC128 encoding and decoding with integrity checks,
+  timing-tolerant reception, and preservation of unknown fields.
+- ESPHome receiver/transmitter bridge, transmitter-only defaults, and no API
+  reboot timeout when Home Assistant is disconnected.
+- State persistence, connection diagnostics, serialized commands, and bounded
+  failure handling without automatic retransmission.
+- User installation guide, entity reference, functional/technical designs, and
+  documented protocol research with sanitized remote captures.
+- CI for lint/format, 288 tests, a 90% coverage gate, Sonar with real coverage,
+  ESPHome validation and firmware compile, Hassfest, and HACS. Verified integration
+  statement coverage: 99.27%.
+- Upgrade checkout to v7.0.1 and setup-python to v7.0.0; handle Sonar secret
+  restrictions on Dependabot-triggered workflows.
 
-## Unreleased - Protocol research
+Requires Home Assistant 2026.10.1 or newer and ESPHome 2026.9.1 or newer.
+IR state is assumed: neither transmission nor reception proves appliance operation.
+Physical acceptance of generated commands by an actual AC remains unverified.
 
-- Archive button-by-button MVP captures for all modes, fan settings, temperature,
-  and C/F switching; correct the unconfirmed byte-7 unit-bit interpretation.
+## Development history
 
-- Validate and archive the first live ON/OFF pair at cool/auto/22 C; confirm that
-  OFF retains mode/fan/setpoint and uses a separate power flag.
-
-- Archive sanitized user-provided ESPHome YAML and review its control behavior.
-- Preserve 31 distinct IR arrays and identify their CARRIER_AC128 wire format.
-- Document the byte map, timing variation, full-state construction, checksums,
-  source revisions, and which features remain unverified on the Webasto unit.
-- Add a timing-tolerant research decoder and capture-backed regression tests.
-- Reconstruct all baseline payloads from complete state and nominal IR timing;
-  add a serial raw-log collector with wrapped-line and malformed-frame tests.
-- Add GPIO32 RX / GPIO26 TX capture firmware and ESPHome config validation CI.
-
-## 0.0.1 - Development scaffold
-
-- Initial HACS-compatible custom integration layout and UI setup.
-- Protocol status diagnostic entity; setup, reload, unload, and multi-entry tests.
-- CI for lint, formatting, Home Assistant tests, hassfest, and HACS validation.
-- Houghton attribution and a proposed entity map linked to the Hungarian manual.
-- ESP32 prototype and raw capture directories with research instructions.
-
-IR decoding, ESP32 communication, and AC controls are not implemented.
-
-### Fahrenheit completion (2026-10-14)
-
-- Support native Fahrenheit climate targets while preserving the learned remote profile.
-- Archive 74–78 °F capture evidence and document asymmetric unit conversion.
-- Cover both temperature fields, unit conversion, validation and waveform round trips.
+Before this prerelease, the repository used 0.0.1 scaffold and 0.1.0 development
+versions. These were not published releases. Development progressed from the
+original 31-command ESPHome prototype through button-by-button remote captures,
+full-state protocol decoding, Home Assistant entity implementation, and
+Fahrenheit control. Research evidence remains in `captures/` and `docs/`.

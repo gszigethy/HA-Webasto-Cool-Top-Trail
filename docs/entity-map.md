@@ -1,6 +1,6 @@
 # Home Assistant entity reference
 
-These entities are implemented in version 0.1.0. Example IDs assume entry name
+These entities are implemented in version 1.0.0 beta 1. Example IDs assume entry name
 **Caravan AC** and no naming collisions; actual IDs come from the entity registry.
 All eight entities share one Webasto Cool Top Trail device. IDs/unique IDs survive
 reloads and entry-title changes; creating another entry gives it independent identity.
