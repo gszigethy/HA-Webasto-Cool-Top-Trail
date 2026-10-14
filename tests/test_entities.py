@@ -136,7 +136,7 @@ async def test_optional_temperature_sensor_units_and_invalid_values(hass):
     )
 
 
-async def test_corrupt_remote_frame_and_fahrenheit_limit(hass):
+async def test_corrupt_remote_frame_and_fahrenheit_control(hass):
     entry, send = await setup_bridge(hass)
     hass.states.async_set(entry.runtime_data.receiver, "16 00")
     await hass.async_block_till_done()
@@ -144,11 +144,12 @@ async def test_corrupt_remote_frame_and_fahrenheit_limit(hass):
     fahrenheit = "16 18 18 21 09 10 24 C0 00 00 08 76 00 00 08 D0"
     hass.states.async_set(entry.runtime_data.receiver, fahrenheit)
     await hass.async_block_till_done()
-    with pytest.raises(HomeAssistantError, match="Celsius"):
-        await entry.runtime_data.async_send(temperature=23)
+    await call(hass, "climate", "set_temperature", "climate.caravan_ac", temperature=25)
+    assert entry.runtime_data.frame[6] == 0x25
+    assert entry.runtime_data.frame[11] == 0x77
     await entry.runtime_data.async_send(panel_lock=True)
-    assert entry.runtime_data.frame[11] == 0x76
-    assert send.call_count == 1
+    assert entry.runtime_data.frame[11] == 0x77
+    assert send.call_count == 2
 
 
 async def test_default_profile_is_opt_in_without_startup_transmission(hass):
@@ -180,4 +181,29 @@ async def test_timeout_does_not_advance_state_or_retry(hass):
     with pytest.raises(HomeAssistantError, match="may have been transmitted"):
         await entry.runtime_data.async_send(hvac_mode="off")
     assert entry.runtime_data.frame == bytes.fromhex(FRAME)
+    assert send.call_count == 1
+
+
+@pytest.mark.parametrize("fahrenheit_display", [False, True])
+async def test_fahrenheit_profile_display_and_commands(hass, fahrenheit_display):
+    from homeassistant.util.unit_system import US_CUSTOMARY_SYSTEM
+
+    if fahrenheit_display:
+        hass.config.units = US_CUSTOMARY_SYSTEM
+    entry, send = await setup_bridge(hass)
+    hass.states.async_set(
+        entry.runtime_data.receiver, "16 18 18 21 09 10 24 C0 00 00 08 76 00 00 08 D0"
+    )
+    await hass.async_block_till_done()
+    state = hass.states.get("climate.caravan_ac")
+    assert state.attributes["temperature"] == (76 if fahrenheit_display else 24.4)
+    await call(
+        hass,
+        "climate",
+        "set_temperature",
+        "climate.caravan_ac",
+        temperature=78 if fahrenheit_display else (78 - 32) * 5 / 9,
+    )
+    assert entry.runtime_data.frame[11] == 0x78
+    assert entry.runtime_data.frame[6] == 0x26
     assert send.call_count == 1

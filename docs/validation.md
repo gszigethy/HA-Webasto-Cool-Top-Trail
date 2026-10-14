@@ -19,7 +19,7 @@ measure it. Checksums and user labels corroborate accepted frames; rejected fram
 are never repaired to fit expectations. No synthesized command has yet been
 optically verified or accepted by the physical AC in this project.
 
-The final local implementation check on 2026-10-13 passed **223 tests**, with
+The final local implementation check on 2026-10-14 passed **244 tests**, with
 **95% integration statement coverage**. Ruff lint/format checks passed, and the
 full ESPHome bridge firmware compiled successfully. See GitHub Actions for
 checks on the current commit. These are software checks, not appliance proof.
@@ -57,8 +57,9 @@ as new evidence without rewriting the historical captures.
 
 - Byte 7 bit 3: previously called Celsius flag upstream; explicitly contradicted
   by local Celsius and Fahrenheit captures. Preserve as unknown.
-- Fahrenheit setpoint mapping: only 24 °C / 76 °F tested, insufficient to write
-  arbitrary Fahrenheit-profile targets. HA preferred display units are separate.
+- Fahrenheit mapping: captures at 74–78 °F validate rounded Celsius mirror fields;
+  C/F switches at 23–25 °C support upward Fahrenheit rounding. Full-range
+  endpoint behavior remains reference-derived rather than physically captured.
 - Counter high nibble / reserved fields: observed but not understood; preserve.
 - ECO: reference flag exists but no remote button/local capability evidence.
 - Exact SET TIME value-edit send trigger: entering/selecting alone produced no

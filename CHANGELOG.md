@@ -40,3 +40,9 @@
 - ESP32 prototype and raw capture directories with research instructions.
 
 IR decoding, ESP32 communication, and AC controls are not implemented.
+
+### Fahrenheit completion (2026-10-14)
+
+- Support native Fahrenheit climate targets while preserving the learned remote profile.
+- Archive 74–78 °F capture evidence and document asymmetric unit conversion.
+- Cover both temperature fields, unit conversion, validation and waveform round trips.

@@ -84,10 +84,10 @@ and retain settings; reconnects do not send commands. Protocol status remains
 readable. Native send failure leaves state unchanged, though timeout outcome is
 ambiguous: a command could already have been emitted, and no retry is automatic.
 
-Temperature is rounded to the nearest 1 °C after HA converts its display units.
-Captured Fahrenheit profiles remain usable for other controls, but target edits
-require learning a Celsius profile. This avoids inventing the observed 24 °C /
-76 °F mapping. Mode changes keep one current setpoint; they do not reproduce the
+Temperature is rounded to the nearest integer in the learned remote profile
+(°C or °F), after HA converts its display units. Fahrenheit edits update both
+fields: byte 11 is the requested Fahrenheit target; byte 6 rounds its Celsius
+equivalent to the nearest integer. Other controls preserve both fields. Mode changes keep one current setpoint; they do not reproduce the
 remote's per-mode memory. Switching to dry/fan-only/heat_cool clears incompatible
 Sleep; turning off retains it and the other auxiliary flags.
 
@@ -109,10 +109,10 @@ Value edits produced full-state IR packets. Their precise transmit trigger
 
 ## Completion and acceptance boundaries
 
-The repo implementation is complete for the documented Celsius control profile
+The repo implementation is complete for the documented Celsius and Fahrenheit control profiles
 and locally confirmed auxiliary fields. Static/isolated tests and firmware
 builds validate software behavior. [Appliance acceptance](validation.md) is a
 separate deployment step: no live HA configuration or firmware deployment is
-performed by development. Broader model support, Fahrenheit setpoint writing,
+performed by development. Broader model support, full-range physical verification,
 unknown flag/counter interpretation and actual appliance telemetry are future
 work requiring new evidence.

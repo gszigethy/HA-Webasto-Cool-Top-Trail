@@ -112,7 +112,7 @@ require a subsequent command/clock sync; schedules have no timezone/DST field.
 | No send action in selector | Pair ESPHome; confirm bridge firmware has `api.actions.send_frame`; check its connection |
 | Awaiting remote frame | Point a Celsius remote at the receiver; check pin/inversion and receiver position |
 | Disconnected | Check Wi-Fi, API pairing/encryption, selected sensor/action and entity availability |
-| Temperature requires Celsius | Switch the physical remote to °C and send a normal command; other controls preserve Fahrenheit frames |
+| Temperature units | Both remote profiles support target edits; HA converts its display units to the learned profile |
 | Unknown room temperature | Configure an actual room sensor; confirm numeric °C/°F state and connectivity |
 | Some presses missing | Capture firmware raw logs; bad timing/extra edges are rejected; avoid changing tolerances to accept noise |
 | HA settings change but AC does not | Check TX GPIO, emitter drive/carrier/position, supply, and AC response; local API success is not optical proof |
