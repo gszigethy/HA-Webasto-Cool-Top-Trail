@@ -9,6 +9,8 @@
   separate secrets, receiver or bridge YAML files. Research YAML moved to
   `captures/`.
 - Simpler, beginner-friendly README with the full device YAML.
+- Show the Webasto "W" logo as the integration icon in Home Assistant
+  (from the CC0 [Webasto Logo 2024.svg](https://commons.wikimedia.org/wiki/File:Webasto_Logo_2024.svg)).
 
 
 ## 1.0.0 beta 1 — 2026-10-14
