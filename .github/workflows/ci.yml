@@ -44,7 +44,7 @@ jobs:
       - name: Run Home Assistant tests with coverage
         run: |
           python -m pytest \
-            --cov=custom_components.webasto_cool_top_trail \
+            --cov=custom_components/webasto_cool_top_trail \
             --cov-report=term-missing \
             --cov-report=xml:coverage.xml \
             --cov-fail-under=90
