@@ -183,8 +183,13 @@ async def test_default_profile_without_startup_transmission(hass):
     assert entry.runtime_data.source == "default"
     assert hass.states.get("climate.caravan_ac").state == "off"
     send.assert_not_called()
+    state = hass.states.get("climate.caravan_ac").attributes
+    assert (state["temperature"], state["fan_mode"]) == (22, "high")
     await call(hass, "climate", "turn_on", "climate.caravan_ac")
-    assert hass.states.get("climate.caravan_ac").state == "cool"
+    assert hass.states.get("climate.caravan_ac").state == "heat_cool"
+    frame = interpret_payload(parse_frame(send.call_args.args[0].data["frame"]))
+    assert (frame["hvac_mode"], frame["fan_mode"]) == ("heat_cool", "high")
+    assert frame["target_temperature_c"] == 22
 
 
 async def test_temperature_service_quantizes_native_celsius_step(hass):

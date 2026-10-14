@@ -37,8 +37,8 @@ Choose your setup:
 
 | Your hardware | What to do |
 | --- | --- |
-| Transmitter only | Follow the steps below and remove the receiver parts of the example; the integration then starts from default settings automatically |
-| Transmitter and receiver | Keep the receiver section; you can initialize settings by pressing a button on the handheld remote |
+| Transmitter only | Follow the steps below and remove the receiver parts of the example |
+| Transmitter and receiver | Keep the receiver parts; Home Assistant also follows changes made with the handheld remote |
 
 ## 1. Prepare the ESP32
 
@@ -161,19 +161,16 @@ The integration finds the rest on that ESP32 by itself: its sending action, and 
 
 ### How Home Assistant gets its first settings
 
-Every command sends the AC's complete settings, so Home Assistant needs a starting point:
+Every command sends the AC's complete settings, so Home Assistant needs a starting point. The controls are available right away, with or without a receiver, starting from these default settings:
 
-- **With a receiver:** press any button on the handheld remote once, pointed at the receiver. Home Assistant takes over all of the remote's settings.
-- **Without a receiver:** Home Assistant starts from default settings automatically.
-
-The default settings are:
-
-- Power off; cooling mode ready for the next turn-on.
-- 24 °C, automatic fan, Sleep off.
+- Power off; automatic heat/cool mode ready for the next turn-on.
+- 22 °C, high fan, Sleep off. (In automatic heat/cool mode the remote itself uses high fan, never auto fan.)
 - Panel display on and panel controls unlocked.
 - Both timers disabled, with stored on/off times of 09:00 and 10:00.
 
-**Setup does not send anything to the AC.** Your first operation of a control sends the complete set of settings, including the defaults you have not changed. For example, turning on starts cooling at 24 °C with automatic fan.
+**Setup does not send anything to the AC.** Your first operation of a control sends the complete set of settings, including the defaults you have not changed. For example, turning on starts automatic heat/cool at 22 °C with high fan.
+
+**With a receiver**, whenever someone uses the handheld remote, Home Assistant takes over all of the remote's settings.
 
 The integration remembers subsequent settings across Home Assistant restarts. Default settings are the starting point, not a reset on every restart.
 
@@ -181,9 +178,7 @@ The integration remembers subsequent settings across Home Assistant restarts. De
 
 After setup, open the **Webasto Cool Top Trail** device in Home Assistant. It has a climate control plus switches, timer times, and a status sensor.
 
-**If using a receiver:** point the handheld remote at the receiver and press a normal AC button. The integration reads its settings and makes the climate control available. Celsius and Fahrenheit remote settings are both supported.
-
-**If using a transmitter alone:** the climate control becomes available as soon as the ESP32 is connected.
+The climate control is available straight away. **If using a receiver**, press a button on the handheld remote, pointed at the receiver: the card should follow the remote's settings. Celsius and Fahrenheit remote settings are both supported.
 
 Place the transmitter so its infrared light can reach the air conditioner's receiver. Try a simple operation, such as turning the AC on, and check the appliance itself for a response. A change on the Home Assistant card alone does not prove the AC received the command.
 
@@ -232,7 +227,6 @@ The system never receives confirmation of actual cooling, heating, compressor op
 | What you see | What to try |
 | --- | --- |
 | Setup says the device has no `send_frame` action | Check that the ESP32 is online and its configuration includes the example's `api:` sending action, named `send_frame` |
-| **Awaiting remote frame** | Point the remote at the receiver and press a button. If you removed the receiver, check that you also removed the **Received IR frame** sensor, then reload the integration |
 | **Bridge disconnected**, or unavailable controls | Check power, Wi-Fi, the ESPHome connection, and that setup points to the correct ESP32 |
 | **Received IR frame** shows **Unknown** | No valid remote command has been heard yet |
 | You added or removed the receiver later | Update the ESP32 firmware, then reload the Webasto integration so it notices the change |
