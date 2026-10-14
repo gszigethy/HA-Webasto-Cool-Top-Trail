@@ -37,7 +37,7 @@ Choose your setup:
 
 | Your hardware | What to do |
 | --- | --- |
-| Transmitter only | Follow the steps below, omit the receiver section, and enable default starting settings during setup |
+| Transmitter only | Follow the steps below and remove the receiver parts of the example; the integration then starts from default settings automatically |
 | Transmitter and receiver | Keep the receiver section; you can initialize settings by pressing a button on the handheld remote |
 
 ## 1. Prepare the ESP32
@@ -74,9 +74,11 @@ The example uses GPIO26 for sending and GPIO32 for receiving because those were 
 
 Also check the `esp32` board setting against your board. The example uses `esp32dev` with the ESP-IDF framework.
 
-**If you have no receiver:** delete the entire `remote_receiver:` section, including its indented contents. Keep the `text_sensor:` section, both sensors inside it, and the `api:` sending action. The unused `receiver_pin` substitution can be removed too.
+**If you have no receiver:** delete the entire `remote_receiver:` section, including its indented contents, and the **Received IR frame** sensor in the `text_sensor:` section. Keep the **Transmitted IR frame** sensor and the `api:` sending action. The unused `receiver_pin` substitution can be removed too.
 
-**If updating an existing ESPHome device:** merge the example's IR code and sending action into your configuration. Do not paste duplicate top-level `api:`, `esphome:`, or other sections; add their contents to the sections you already have. Stop using the old fixed-command buttons or automations to control the AC once you switch to the new climate control.
+Keep the sensor names and the `send_frame` action name as in the example. The integration finds them on the ESP32 by these names.
+
+**If updating an existing ESPHome device:** merge the example's IR code and sending action into your configuration. Do not paste duplicate top-level `api:`, `esphome:`, or other sections; add their contents to the sections you already have. Also keep `reboot_timeout: 0s` under your `api:` section. Stop using the old fixed-command buttons or automations to control the AC once you switch to the new climate control.
 
 ### Add Wi-Fi details and an encryption key
 
@@ -116,8 +118,8 @@ If the ESP32 is discovered, add it using the **ESPHome** integration. Otherwise,
 
 Open the new ESPHome device. With the default friendly name, you should find:
 
-- **Webasto IR Bridge Received IR frame**
 - **Webasto IR Bridge Transmitted IR frame**
+- **Webasto IR Bridge Received IR frame**, only if your ESP32 has a receiver
 
 These are diagnostic sensors. A “frame” means one complete infrared command. Their contents are technical data used by the integration; you do not need to read or edit them.
 
@@ -152,27 +154,26 @@ Fill in the fields as follows:
 | Field shown in setup | What to choose |
 | --- | --- |
 | **Name** | A name for your AC, such as “Caravan AC” |
-| **ESPHome received IR frame sensor** | The **Received IR frame** sensor belonging to the ESP32 you connected in step 2. Do not select a room-temperature sensor or **Transmitted IR frame** |
-| **ESPHome send_frame action** | The action belonging to your IR sender, for example `esphome.webasto_ir_bridge_send_frame` |
-| **Use default starting settings (transmitter only)** | Turn this on if you have no IR receiver. With a receiver, leave it off if you want to start from the handheld remote's settings |
+| **ESPHome IR bridge** | The ESP32 you connected in step 2, for example **Webasto IR Bridge** |
 | **Room temperature sensor (optional)** | An existing sensor that measures the temperature inside your caravan in °C or °F. Leave it empty if you do not have one |
 
-### Why select “Received IR frame” if you have no receiver?
+The integration finds the rest on that ESP32 by itself: its sending action, and its **Received IR frame** sensor if it has one. If setup says the device has no `send_frame` action, check that the ESP32 is online and runs the bridge configuration.
 
-The current setup also uses this sensor to identify whether the ESPHome connection is available. That is why the sensor must stay in the ESPHome configuration even without receiver hardware.
+### How Home Assistant gets its first settings
 
-Select it even if its value is **Unknown**. With default starting settings enabled, the integration can send commands without ever receiving a remote command. You do not need to enter any IR data yourself.
+Every command sends the AC's complete settings, so Home Assistant needs a starting point:
 
-### What are the default starting settings?
+- **With a receiver:** press any button on the handheld remote once, pointed at the receiver. Home Assistant takes over all of the remote's settings.
+- **Without a receiver:** Home Assistant starts from default settings automatically.
 
-They give Home Assistant an initial set of settings when it has not heard the remote:
+The default settings are:
 
 - Power off; cooling mode ready for the next turn-on.
 - 24 °C, automatic fan, Sleep off.
 - Panel display on and panel controls unlocked.
 - Both timers disabled, with stored on/off times of 09:00 and 10:00.
 
-**Enabling this option does not send anything to the AC.** Your first operation of a control sends the complete set of settings, including the defaults you have not changed. For example, turning on starts cooling at 24 °C with automatic fan.
+**Setup does not send anything to the AC.** Your first operation of a control sends the complete set of settings, including the defaults you have not changed. For example, turning on starts cooling at 24 °C with automatic fan.
 
 The integration remembers subsequent settings across Home Assistant restarts. Default settings are the starting point, not a reset on every restart.
 
@@ -180,9 +181,9 @@ The integration remembers subsequent settings across Home Assistant restarts. De
 
 After setup, open the **Webasto Cool Top Trail** device in Home Assistant. It has a climate control plus switches, timer times, and a status sensor.
 
-**If using a receiver without default settings:** point the handheld remote at the receiver and press a normal AC button. The integration reads its settings and makes the climate control available. Celsius and Fahrenheit remote settings are both supported.
+**If using a receiver:** point the handheld remote at the receiver and press a normal AC button. The integration reads its settings and makes the climate control available. Celsius and Fahrenheit remote settings are both supported.
 
-**If using a transmitter alone:** the climate control should become available once the ESP32 is connected and default starting settings are enabled.
+**If using a transmitter alone:** the climate control becomes available as soon as the ESP32 is connected.
 
 Place the transmitter so its infrared light can reach the air conditioner's receiver. Try a simple operation, such as turning the AC on, and check the appliance itself for a response. A change on the Home Assistant card alone does not prove the AC received the command.
 
@@ -230,11 +231,11 @@ The system never receives confirmation of actual cooling, heating, compressor op
 
 | What you see | What to try |
 | --- | --- |
-| No **Received IR frame** sensor | Confirm you installed the bridge configuration and added the ESP32 through Home Assistant's ESPHome integration. Keep the sensor even without receiver hardware |
-| No `send_frame` action | Check that the ESP32 is online and its configuration includes the example's `api:` sending action |
-| **Awaiting remote frame** | With a receiver, point the remote at it and press a button. With no receiver, enable default starting settings through **Reconfigure** |
-| **Bridge disconnected**, or unavailable controls | Check power, Wi-Fi, the ESPHome connection, and that setup points to the correct sensor and sending action |
-| **Received IR frame** shows **Unknown** | Normal without a receiver. With a receiver, no valid remote command has been heard yet |
+| Setup says the device has no `send_frame` action | Check that the ESP32 is online and its configuration includes the example's `api:` sending action, named `send_frame` |
+| **Awaiting remote frame** | Point the remote at the receiver and press a button. If you removed the receiver, check that you also removed the **Received IR frame** sensor, then reload the integration |
+| **Bridge disconnected**, or unavailable controls | Check power, Wi-Fi, the ESPHome connection, and that setup points to the correct ESP32 |
+| **Received IR frame** shows **Unknown** | No valid remote command has been heard yet |
+| You added or removed the receiver later | Update the ESP32 firmware, then reload the Webasto integration so it notices the change |
 | Current temperature is missing | Choose an actual room-temperature sensor in setup; check that it is available and reports °C or °F |
 | The Home Assistant card changes but the AC does not | Check the transmitter wiring and GPIO, power supply, and its position relative to the AC. Confirm it is a working IR transmitter |
 | Remote presses do not update Home Assistant | Check receiver wiring and position. Incomplete or noisy commands are ignored |
@@ -242,7 +243,7 @@ The system never receives confirmation of actual cooling, heating, compressor op
 
 The **Protocol status** sensor helps distinguish a disconnected ESP32 from a connected system waiting for its first remote command. **Ready** means the integration has a connection and settings it can send; it does not mean the air conditioner has confirmed anything.
 
-To change your choices, open **Settings → Devices & services**, find the Webasto integration entry, and choose **Reconfigure** from its menu. You can change the selected sensor/action, name, default-settings option, or room-temperature sensor. Clear the optional room sensor to remove it.
+To change your choices, open **Settings → Devices & services**, find the Webasto integration entry, and choose **Reconfigure** from its menu. You can change the name, the selected ESP32, or the room-temperature sensor. Clear the optional room sensor to remove it.
 
 If reporting a problem, include your AC/remote model, ESP32 board, transmitter/receiver pins, ESPHome version, and what happened at the appliance. Remove passwords and encryption keys from any configuration or logs you share.
 

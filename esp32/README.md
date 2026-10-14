@@ -10,7 +10,7 @@ For installation, start with the [step-by-step guide](../docs/installation.md). 
 | [webasto_ir.h](webasto_ir.h) | Required companion code; put beside your device YAML without editing it |
 | [secrets.example.yaml](secrets.example.yaml) | Example secret names; replace placeholders with private values in your own `secrets.yaml` |
 
-The example uses GPIO26 for the transmitter and GPIO32 for the receiver. **Change these to match your wiring.** For a transmitter-only setup, remove the `remote_receiver:` section but keep both text sensors and the sending action.
+The example uses GPIO26 for the transmitter and GPIO32 for the receiver. **Change these to match your wiring.** For a transmitter-only setup, remove the `remote_receiver:` section and the **Received IR frame** sensor; keep the **Transmitted IR frame** sensor and the sending action. Keep their names: the integration finds them by name.
 
 The Home Assistant integration provides the climate control. The ESPHome configuration provides the connection and infrared sender; it does not create a second climate entity.
 
