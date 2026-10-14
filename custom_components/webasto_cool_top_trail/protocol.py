@@ -251,7 +251,7 @@ def mutate_frame(template: bytes, clock: time, **changes) -> bytes:
         if changes["preset"] not in ("none", "sleep"):
             raise ValueError("Unsupported preset")
         if changes["preset"] == "sleep" and mode not in ("heat", "cool"):
-            raise ValueError("Sleep requires active heating or cooling")
+            raise ValueError("Turn on heat or cool before enabling Sleep")
         result[7] = (result[7] & ~2) | (2 if changes["preset"] == "sleep" else 0)
     for name, index, mask, inverted in (
         ("display", 13, 64, True),

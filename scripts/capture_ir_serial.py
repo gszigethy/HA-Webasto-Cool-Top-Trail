@@ -7,14 +7,16 @@ the collector does not reset, flash, or transmit to the device.
 import argparse
 import json
 import re
+import sys
 import time
 from datetime import UTC, datetime
 from pathlib import Path
 
-if __package__:
-    from .analyze_ir_baseline import decode_pulses, interpret_payload
-else:
-    from analyze_ir_baseline import decode_pulses, interpret_payload
+# Import the pure codec directly without running the Home Assistant package setup.
+REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPOSITORY_ROOT / "custom_components/webasto_cool_top_trail"))
+
+from protocol import decode_pulses, interpret_payload  # noqa: E402
 
 ANSI = re.compile(r"\x1b\[[0-?]*[ -/]*[@-~]")
 RAW_LOG = re.compile(r"\[remote\.raw(?::[^\]]+)?\]:?\s?(.*)")

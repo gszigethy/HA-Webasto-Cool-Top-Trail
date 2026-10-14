@@ -2,8 +2,8 @@
 
 These entities are implemented in version 0.1.0. Example IDs assume entry name
 **Caravan AC** and no naming collisions; actual IDs come from the entity registry.
-All nine entities share one Houghton device. IDs/unique IDs survive reloads and
-entry-title changes; creating another entry gives it independent identity.
+All nine entities share one Webasto Cool Top Trail device. IDs/unique IDs survive
+reloads and entry-title changes; creating another entry gives it independent identity.
 
 | Example entity ID | Domain / category | Behavior |
 | --- | --- | --- |
@@ -108,6 +108,6 @@ controls send complete state, so unknown and untouched fields remain intact.
 Protocol status is always readable, including while other entities are unavailable.
 `ready` describes software transport readiness. Control state is **assumed** and
 may diverge from the appliance if IR is missed, another remote changes it outside
-receiver range, or a timer executes. `state_source` and `appliance_feedback: false`
-make that boundary explicit. Repeated stale sensor values do not overwrite newer
-saved commanded state on restart.
+receiver range, or a timer executes. `state_source` identifies the software state
+source; IR provides no appliance feedback. Repeated stale sensor values do not
+overwrite newer saved commanded state on restart.
