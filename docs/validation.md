@@ -10,7 +10,7 @@
 | Live auxiliaries | Display, lock, Sleep, clock edits, timer cycles and independent minute edits | Local auxiliary flag/time mapping; rejected captures explicitly retained |
 | Production codec | Full-state mutations, integrity/semantic rejection, reserved-field preservation tests | Software command construction and bounded input handling |
 | C++ replay | Native g++ build with warnings as errors and undefined-behavior sanitizer, every archived waveform | Deployed C++ wire codec agrees with Python on valid/invalid corpus |
-| HA tests | Isolated actual HA entities/services, fake native sender | Setup/reconfigure/reload/unload, IDs, controls, failures, races, availability and persistence |
+| HA tests | Isolated actual HA entities/services, fake native sender | Setup/reconfigure/reload/unload, IDs, controls, clock refresh on every explicit send, failures, races, availability and persistence |
 | ESP firmware | Full bridge compiled for ESP32/ESP-IDF with ESPHome 2026.9.1 | YAML/code generation and firmware linkage; no deployment implied |
 
 IR timing is approximate and capture distortion is expected. Carrier frequency is

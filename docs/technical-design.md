@@ -13,7 +13,7 @@ flowchart LR
   HA --> Store[HA local frame storage]
 ```
 
-The custom integration owns one climate entity and eight auxiliaries. Built-in
+The custom integration owns one climate entity and seven auxiliaries. Built-in
 ESPHome owns discovery, encrypted connection, native API action registration,
 connection recovery and transport sensors. No second ESPHome connection or
 third-party Python runtime requirement is introduced; the manifest declares
@@ -35,7 +35,7 @@ identity prevents duplicate entries even if display names differ.
 | `coordinator.py` | State-change subscriptions, native action invocation, serialized commands, persistence and availability |
 | `entity.py` | Device identity and push subscription lifecycle |
 | `climate.py` | Standard HVAC/target/fan/preset service methods, optional measured temperature |
-| `switch.py`, `time.py`, `button.py` | Auxiliary boolean settings, stored schedule times and explicit clock sync |
+| `switch.py`, `time.py` | Auxiliary boolean settings and stored schedule times |
 | `sensor.py` | Readiness and source/frame/session timestamp diagnostics |
 | `config_flow.py` | UI create/reconfigure flow, names, duplicate endpoint protection |
 | `esp32/webasto_ir.h` | Standalone C++ wire parser/encoder/receiver decoder, independent of HA |
@@ -75,7 +75,7 @@ preserve enable bits; enable edits preserve stored times.
 Before every explicitly requested command, set BCD hour/minute/second from HA
 local time and recompute each section checksum. There is no checksum bypass,
 partial-frame send, fixed timing-array replay, spontaneous initialization send,
-or background schedule/clock command. The codec has no network or HA dependencies.
+or background schedule/clock command, and no separate clock-sync action. The codec has no network or HA dependencies.
 
 ## Reception and timing
 

@@ -1,12 +1,14 @@
 """Control real HA entities through services, without contacting any devices."""
 
 import asyncio
-from datetime import time
+from datetime import datetime, time
+from unittest.mock import patch
 
 import pytest
 from homeassistant.exceptions import HomeAssistantError
 
 from custom_components.webasto_cool_top_trail.protocol import (
+    checksum,
     default_frame,
     interpret_payload,
     mutate_frame,
@@ -118,8 +120,26 @@ async def test_modes_presets_and_no_fake_telemetry(hass):
     assert hass.states.get("climate.caravan_ac").attributes["fan_mode"] == "low"
     with pytest.raises(HomeAssistantError):
         await entry.runtime_data.async_send(fan_mode="high")
-    await call(hass, "button", "press", "button.caravan_ac_synchronize_clock")
-    assert send.call_count == 3
+    assert send.call_count == 2
+
+
+async def test_every_explicit_send_refreshes_clock(hass):
+    _, send = await setup_bridge(hass)
+    actions = (
+        ("climate", "set_temperature", "climate.caravan_ac", {"temperature": 23}),
+        ("switch", "turn_on", "switch.caravan_ac_panel_display", {}),
+        ("time", "set_value", "time.caravan_ac_on_time", {"time": "07:35:00"}),
+    )
+    for index, (domain, action, entity, data) in enumerate(actions):
+        now = datetime(2026, 10, 14, 12 + index, 34, 56)
+        with patch(
+            "custom_components.webasto_cool_top_trail.coordinator.dt_util.now",
+            return_value=now,
+        ):
+            await call(hass, domain, action, entity, **data)
+        frame = parse_frame(send.call_args.args[0].data["frame"])
+        assert interpret_payload(frame)["clock"] == now.strftime("%H:%M:%S")
+    assert send.call_count == len(actions)
 
 
 async def test_optional_temperature_sensor_units_and_invalid_values(hass):
@@ -209,3 +229,18 @@ async def test_fahrenheit_profile_display_and_commands(hass, fahrenheit_display)
     assert entry.runtime_data.frame[11] == 0x78
     assert entry.runtime_data.frame[6] == 0x26
     assert send.call_count == 1
+
+
+async def test_received_fan_outside_mode_rules_is_shown(hass):
+    # Fan-only with auto fan: valid wire data that HA itself would not produce.
+    frame = bytearray(bytes.fromhex(FRAME.replace(" ", "")))
+    frame[1] = 0x14
+    for start in (0, 8):
+        frame[start + 7] = (checksum(bytes(frame[start : start + 8])) << 4) | (
+            frame[start + 7] & 15
+        )
+    await setup_bridge(hass, frame=frame.hex(" ").upper())
+    state = hass.states.get("climate.caravan_ac")
+    assert state.state == "fan_only"
+    assert state.attributes["fan_mode"] == "auto"
+    assert state.attributes["fan_modes"] == ["auto", "low", "medium", "high"]
