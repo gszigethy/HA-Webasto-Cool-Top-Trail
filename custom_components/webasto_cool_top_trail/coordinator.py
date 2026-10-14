@@ -16,13 +16,8 @@ from homeassistant.helpers.event import async_track_state_change_event
 from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 
-from .const import (
-    CONF_RECEIVER,
-    CONF_SEND_SERVICE,
-    CONF_TEMPERATURE_SENSOR,
-    CONF_USE_DEFAULT_STATE,
-    DOMAIN,
-)
+from .const import CONF_TEMPERATURE_SENSOR, DOMAIN
+from .discovery import BridgeEndpoints
 from .protocol import default_frame, interpret_payload, mutate_frame, parse_frame
 
 _LOGGER = logging.getLogger(__name__)
@@ -31,9 +26,10 @@ _LOGGER = logging.getLogger(__name__)
 class WebastoBridge:
     """Track commanded state; IR reception cannot prove appliance operation."""
 
-    def __init__(self, hass: HomeAssistant, entry) -> None:
+    def __init__(self, hass: HomeAssistant, entry, endpoints: BridgeEndpoints) -> None:
         self.hass = hass
         self.entry = entry
+        self.endpoints = endpoints
         self.frame: bytes | None = None
         self.source = "unknown"
         self.last_received = None
@@ -46,21 +42,22 @@ class WebastoBridge:
         self._store = Store(hass, 1, f"{DOMAIN}.{entry.entry_id}")
 
     @property
-    def receiver(self) -> str:
-        return self.entry.data[CONF_RECEIVER]
+    def receiver(self) -> str | None:
+        return self.endpoints.receiver
 
     @property
     def service(self) -> str:
-        return self.entry.data[CONF_SEND_SERVICE].removeprefix("esphome.")
+        return self.endpoints.service
 
     @property
     def connected(self) -> bool:
-        state = self.hass.states.get(self.receiver)
-        return bool(
-            not self._closed
-            and state
+        if self._closed or not self.hass.services.has_service("esphome", self.service):
+            return False
+        # ESPHome keeps actions registered while offline; its entities show the link.
+        return any(
+            (state := self.hass.states.get(entity_id))
             and state.state != STATE_UNAVAILABLE
-            and self.hass.services.has_service("esphome", self.service)
+            for entity_id in self.endpoints.entities
         )
 
     @property
@@ -84,10 +81,11 @@ class WebastoBridge:
                     )
             except ValueError, KeyError, TypeError:
                 _LOGGER.warning("Ignoring invalid saved IR state")
-        if self.frame is None and self.entry.data.get(CONF_USE_DEFAULT_STATE):
+        # Without a receiver nothing can be learned; start from the documented profile.
+        if self.frame is None and self.receiver is None:
             self.frame = default_frame()
             self.source = "default"
-        watched = [self.receiver]
+        watched = list(self.endpoints.entities)
         if sensor := self.entry.data.get(CONF_TEMPERATURE_SENSOR):
             watched.append(sensor)
         self.entry.async_on_unload(
@@ -97,13 +95,13 @@ class WebastoBridge:
             self.entry.async_on_unload(
                 self.hass.bus.async_listen(event, self._service_changed)
             )
-        if state := self.hass.states.get(self.receiver):
+        if self.receiver and (state := self.hass.states.get(self.receiver)):
             self._receive(state.state)
 
     @callback
     def _state_changed(self, event) -> None:
         state = event.data.get("new_state")
-        if event.data["entity_id"] == self.receiver and state:
+        if self.receiver and event.data["entity_id"] == self.receiver and state:
             self._receive(state.state)
         self._notify()
 

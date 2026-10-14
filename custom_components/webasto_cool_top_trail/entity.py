@@ -17,8 +17,8 @@ class WebastoEntity(Entity):
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, bridge.entry.entry_id)},
             name=bridge.entry.title,
-            manufacturer="Houghton",
-            model="Webasto Cool Top Trail (CARRIER_AC128)",
+            manufacturer="Webasto",
+            model="Cool Top Trail",
         )
 
     @property
