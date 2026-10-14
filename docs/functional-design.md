@@ -18,9 +18,9 @@ cloud, broker, HTTP server, background command replay or HA YAML helpers.
 
 **Installer:** merge the bridge transport/header into ESPHome, choose actual
 hardware pins and secrets, compile/flash when ready, pair built-in ESPHome,
-install HACS integration, select receiver sensor/send action. Learning a valid
-remote frame initializes requested settings. Setup asks only for the ESPHome
-device; without a receiver sensor on it, the documented default profile is used.
+install HACS integration, select the ESPHome device. Controls start from the
+documented default profile with or without a receiver; a valid received remote
+frame replaces the settings whenever the remote is used.
 
 **Occupant:** use one climate entity to turn the AC off/on, choose heat/cool/dry/
 fan-only/automatic heat-cool selection, set temperature, fan and Sleep. Configure
@@ -75,9 +75,9 @@ means a remote or local transmitter emitted a command. Neither proves the AC
 received it, is heating/cooling, or has reached a temperature. Timers may run
 without generating any IR, so HA cannot observe those transitions.
 
-With learning enabled and no template, controls are unavailable. With an
-explicit default profile they start with assumed off/cool/24 °C/auto, auxiliaries
-at documented defaults, without emission. A saved frame restores the last
+Without a saved frame, controls start with the default profile: assumed
+off/heat_cool/22 °C/high fan (the remote's AUTO mode never uses auto fan),
+auxiliaries at documented defaults, without emission. A saved frame restores the last
 requested state; a stale replay of the old receiver value does not undo it.
 A new valid received frame replaces it. Disconnects make controls unavailable
 and retain settings; reconnects do not send commands. Protocol status remains

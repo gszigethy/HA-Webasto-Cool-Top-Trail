@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Webasto Cool Top Trail",
-        "description": "Először párosítsa az IR hidat a beépített ESPHome integrációval, majd válassza ki itt. Ha a hídon van IR vevő, nyomja meg egyszer a távirányító bármelyik gombját az aktuális beállítások betöltéséhez. Vevő nélkül a vezérlés alapbeállításokkal indul: kikapcsolva, hűtés, 24 °C, automatikus ventilátor, kijelző be, feloldva, Sleep és időzítők ki; az első elküldött parancs ezt a teljes profilt alkalmazza. Az IR nem ad visszajelzést a klíma működéséről; a szobahőmérséklet opcionális.",
+        "description": "Először párosítsa az IR hidat a beépített ESPHome integrációval, majd válassza ki itt. A vezérlés azonnal használható, alapbeállításokkal: kikapcsolva, automatikus fűtés/hűtés, 22 °C, magas ventilátorfokozat. Ha a hídon van IR vevő, a távirányító használatakor a beállításokat átveszi. Az IR nem ad visszajelzést a klíma működéséről; a szobahőmérséklet opcionális.",
         "data": {
           "name": "Név",
           "device_id": "ESPHome IR híd",
@@ -12,7 +12,7 @@
       },
       "reconfigure": {
         "title": "Webasto Cool Top Trail",
-        "description": "Először párosítsa az IR hidat a beépített ESPHome integrációval, majd válassza ki itt. Ha a hídon van IR vevő, nyomja meg egyszer a távirányító bármelyik gombját az aktuális beállítások betöltéséhez. Vevő nélkül a vezérlés alapbeállításokkal indul: kikapcsolva, hűtés, 24 °C, automatikus ventilátor, kijelző be, feloldva, Sleep és időzítők ki; az első elküldött parancs ezt a teljes profilt alkalmazza. Az IR nem ad visszajelzést a klíma működéséről; a szobahőmérséklet opcionális.",
+        "description": "Először párosítsa az IR hidat a beépített ESPHome integrációval, majd válassza ki itt. A vezérlés azonnal használható, alapbeállításokkal: kikapcsolva, automatikus fűtés/hűtés, 22 °C, magas ventilátorfokozat. Ha a hídon van IR vevő, a távirányító használatakor a beállításokat átveszi. Az IR nem ad visszajelzést a klíma működéséről; a szobahőmérséklet opcionális.",
         "data": {
           "name": "Név",
           "device_id": "ESPHome IR híd",
@@ -56,7 +56,6 @@
       "protocol_status": {
         "name": "Protokoll állapot",
         "state": {
-          "awaiting_frame": "Távirányító keretre vár",
           "ready": "Kész",
           "disconnected": "A híd nem kapcsolódik"
         }
