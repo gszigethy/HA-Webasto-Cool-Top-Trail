@@ -19,8 +19,8 @@ cloud, broker, HTTP server, background command replay or HA YAML helpers.
 **Installer:** merge the bridge transport/header into ESPHome, choose actual
 hardware pins and secrets, compile/flash when ready, pair built-in ESPHome,
 install HACS integration, select receiver sensor/send action. Learning a valid
-remote frame initializes requested settings. A transmitter-only installer can
-explicitly choose the documented default starting profile instead.
+remote frame initializes requested settings. Setup asks only for the ESPHome
+device; without a receiver sensor on it, the documented default profile is used.
 
 **Occupant:** use one climate entity to turn the AC off/on, choose heat/cool/dry/
 fan-only/automatic heat-cool selection, set temperature, fan and Sleep. Configure

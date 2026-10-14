@@ -175,13 +175,8 @@ async def test_corrupt_remote_frame_and_fahrenheit_control(hass):
     assert send.call_count == 2
 
 
-async def test_default_profile_is_opt_in_without_startup_transmission(hass):
-    entry, send = await setup_bridge(hass, frame="unknown")
-    hass.config_entries.async_update_entry(
-        entry, data={**entry.data, "use_default_state": True}
-    )
-    assert await hass.config_entries.async_reload(entry.entry_id)
-    await hass.async_block_till_done()
+async def test_default_profile_without_startup_transmission(hass):
+    entry, send = await setup_bridge(hass, receiver=False)
     assert entry.runtime_data.frame == default_frame()
     assert entry.runtime_data.source == "default"
     assert hass.states.get("climate.caravan_ac").state == "off"
