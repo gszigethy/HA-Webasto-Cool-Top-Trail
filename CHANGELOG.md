@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.1 — 2026-10-14
+
+- Run every HACS validation check, including brands (the integration ships its
+  own icon), in preparation for inclusion in the HACS default store. No
+  functional changes.
+
 ## 1.0.0 — 2026-10-14
 
 First stable release for Houghton-made Webasto Cool Top Trail air conditioners.
