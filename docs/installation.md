@@ -42,16 +42,20 @@ Choose your setup:
 
 ## 1. Prepare the ESP32
 
-### Get the two required files
+### Copy the device YAML
 
-Open these files in the repository and download their contents:
+Create a device in ESPHome Device Builder and paste the contents of
+[bridge.example.yaml](../esp32/bridge.example.yaml) into its YAML editor.
 
-- [bridge.example.yaml](../esp32/bridge.example.yaml): the ESPHome device configuration.
-- [webasto_ir.h](../esp32/webasto_ir.h): the code that reads and writes the infrared signals. You do not need to edit this file.
+ESPHome downloads the shared IR configuration and C++ code from GitHub when you
+validate or install the device. **You do not need to download or place a header
+file.** The computer running Device Builder needs internet access for that download;
+the ESP32 controls the AC locally after installation.
 
-Put them in the same ESPHome configuration folder. In ESPHome Device Builder, this is the folder containing your device YAML files, commonly `/config/esphome`. Creating a device in Device Builder gives you a YAML file to edit; place the example's contents in that file and upload `webasto_ir.h` alongside it using your usual file editor or file access tool.
-
-The YAML line `includes: - webasto_ir.h` tells ESPHome to use the companion file. Downloading only the YAML is not enough.
+This package-based example was added after **1.0.0 beta 1**. Its `webasto_ref: main`
+uses the current repository configuration. Do not change it to `v1.0.0-beta.1`,
+which does not contain the packages. Future releases can be selected by changing
+this value to their tag.
 
 ### Set your device name and pins
 
@@ -74,11 +78,11 @@ The example uses GPIO26 for sending and GPIO32 for receiving because those were 
 
 Also check the `esp32` board setting against your board. The example uses `esp32dev` with the ESP-IDF framework.
 
-**If you have no receiver:** delete the entire `remote_receiver:` section, including its indented contents, and the **Received IR frame** sensor in the `text_sensor:` section. Keep the **Transmitted IR frame** sensor and the `api:` sending action. The unused `receiver_pin` substitution can be removed too.
+**If you have no receiver:** remove the `esp32/packages/receiver.yaml` line from the `packages` list. The optional `receiver_pin` substitution can also be removed. The sending action and Transmitted IR frame sensor remain in the bridge package automatically.
 
 Keep the sensor names and the `send_frame` action name as in the example. The integration finds them on the ESP32 by these names.
 
-**If updating an existing ESPHome device:** merge the example's IR code and sending action into your configuration. Do not paste duplicate top-level `api:`, `esphome:`, or other sections; add their contents to the sections you already have. Also keep `reboot_timeout: 0s` under your `api:` section. Stop using the old fixed-command buttons or automations to control the AC once you switch to the new climate control.
+**If updating an existing ESPHome device:** add the example's `packages:` block and pin substitutions to your existing YAML. Keep your existing board, Wi-Fi, API encryption, OTA and other hardware settings. If your YAML already has `packages:` or `substitutions:`, add to those sections instead of creating a second copy. The package supplies `api.reboot_timeout: 0s`; keep this value if you also set it locally. Remove the old `includes: webasto_ir.h` entry and old Webasto sending action, sensors and receiver/transmitter blocks before using the package, to avoid duplicate IDs. Unrelated IR functions may need their existing receiver/transmitter blocks merged with the package by ID. Stop using the old fixed-command buttons or automations to control the AC once you switch to the new climate control.
 
 ### Add Wi-Fi details and an encryption key
 

@@ -1,16 +1,19 @@
 # ESPHome files
 
-For installation, start with the [step-by-step guide](../docs/installation.md). It explains where to put the files, what to change for your board, and how to connect the ESP32 to Home Assistant.
+For installation, start with the [step-by-step guide](../docs/installation.md). It explains what to paste into Device Builder, which pins to set, and how to connect the ESP32 to Home Assistant. No header file needs to be placed manually.
 
 ## Files for normal use
 
 | File | Purpose |
 | --- | --- |
 | [bridge.example.yaml](bridge.example.yaml) | ESPHome configuration for sending AC commands and optionally receiving handheld remote commands |
-| [webasto_ir.h](webasto_ir.h) | Required companion code; put beside your device YAML without editing it |
+| [packages/bridge.yaml](packages/bridge.yaml) | Shared sending action and transport configuration; downloaded automatically |
+| [packages/receiver.yaml](packages/receiver.yaml) | Optional receiver configuration; downloaded automatically |
 | [secrets.example.yaml](secrets.example.yaml) | Example secret names; replace placeholders with private values in your own `secrets.yaml` |
 
-The example uses GPIO26 for the transmitter and GPIO32 for the receiver. **Change these to match your wiring.** For a transmitter-only setup, remove the `remote_receiver:` section and the **Received IR frame** sensor; keep the **Transmitted IR frame** sensor and the sending action. Keep their names: the integration finds them by name.
+The example uses GPIO26 for the transmitter and GPIO32 for the receiver. **Change these to match your wiring.** For a transmitter-only setup, remove the `esp32/packages/receiver.yaml` line from the package list. The bridge package keeps the **Transmitted IR frame** sensor and sending action. Keep their names: the integration finds them by name.
+
+ESPHome downloads the codec from [components/webasto_ir](../components/webasto_ir) automatically. The `webasto_ref` substitution chooses both the package and component revision. This support was added after beta 1; the current example uses `main`, and cannot use the beta 1 tag.
 
 The Home Assistant integration provides the climate control. The ESPHome configuration provides the connection and infrared sender; it does not create a second climate entity.
 

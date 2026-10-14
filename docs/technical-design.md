@@ -40,7 +40,7 @@ duplicates. Changing the bridge firmware's entities requires a reload.
 | `sensor.py` | Readiness and source/frame/session timestamp diagnostics |
 | `config_flow.py` | UI create/reconfigure flow, names, duplicate device protection |
 | `discovery.py` | Resolve an ESPHome device to its send action, optional receiver sensor and entities |
-| `esp32/webasto_ir.h` | Standalone C++ wire parser/encoder/receiver decoder, independent of HA |
+| `components/webasto_ir/webasto_ir.h` | Standalone C++ wire parser/encoder/receiver decoder, independent of HA |
 | `esp32/bridge.example.yaml` | ESPHome API, Wi-Fi, TX/RX hardware and sensor publication |
 | `scripts/` | Offline research and private raw serial collection; not imported by the installed integration |
 
