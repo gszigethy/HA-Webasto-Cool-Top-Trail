@@ -26,6 +26,8 @@ logger:
   level: INFO
 
 api:
+  # The caravan bridge may run without Home Assistant connected, so it must not reboot every 15 minutes.
+  reboot_timeout: 0s
   encryption:
     key: !secret api_encryption_key
   actions:
@@ -71,7 +73,9 @@ api:
 ota:
   - platform: esphome
 
+# Keep these names: the Home Assistant integration finds the sensors by name.
 text_sensor:
+  # Without an IR receiver, delete this sensor together with remote_receiver.
   - platform: template
     id: received_frame
     name: Received IR frame

@@ -3,34 +3,29 @@
     "step": {
       "user": {
         "title": "Webasto Cool Top Trail",
-        "description": "Válassza ki az ESPHome híd vett IR keret érzékelőjét és send_frame műveletét. Először párosítsa a hidat a beépített ESPHome integrációval. A vezérlés érvényes távirányító keret vétele után válik elérhetővé. Csak adóval használva válassza az alapbeállításokat. Az IR nem ad visszajelzést a klíma működéséről.",
+        "description": "Először párosítsa az IR hidat a beépített ESPHome integrációval, majd válassza ki itt. Ha a hídon van IR vevő, nyomja meg egyszer a távirányító bármelyik gombját az aktuális beállítások betöltéséhez. Vevő nélkül a vezérlés alapbeállításokkal indul: kikapcsolva, hűtés, 24 °C, automatikus ventilátor, kijelző be, feloldva, Sleep és időzítők ki; az első elküldött parancs ezt a teljes profilt alkalmazza. Az IR nem ad visszajelzést a klíma működéséről; a szobahőmérséklet opcionális.",
         "data": {
           "name": "Név",
-          "receiver_entity": "ESPHome vett IR keret érzékelő",
-          "send_service": "ESPHome send_frame művelet",
-          "temperature_sensor": "Szobahőmérséklet érzékelő (opcionális)",
-          "use_default_state": "Indítás alapbeállításokkal távirányító keret betanítása nélkül"
+          "device_id": "ESPHome IR híd",
+          "temperature_sensor": "Szobahőmérséklet érzékelő (opcionális)"
         }
       },
       "reconfigure": {
         "title": "Webasto Cool Top Trail",
-        "description": "Válassza ki az ESPHome híd vett IR keret érzékelőjét és send_frame műveletét. Először párosítsa a hidat a beépített ESPHome integrációval. A vezérlés érvényes távirányító keret vétele után válik elérhetővé. Csak adóval használva válassza az alapbeállításokat. Az IR nem ad visszajelzést a klíma működéséről.",
+        "description": "Először párosítsa az IR hidat a beépített ESPHome integrációval, majd válassza ki itt. Ha a hídon van IR vevő, nyomja meg egyszer a távirányító bármelyik gombját az aktuális beállítások betöltéséhez. Vevő nélkül a vezérlés alapbeállításokkal indul: kikapcsolva, hűtés, 24 °C, automatikus ventilátor, kijelző be, feloldva, Sleep és időzítők ki; az első elküldött parancs ezt a teljes profilt alkalmazza. Az IR nem ad visszajelzést a klíma működéséről; a szobahőmérséklet opcionális.",
         "data": {
           "name": "Név",
-          "receiver_entity": "ESPHome vett IR keret érzékelő",
-          "send_service": "ESPHome send_frame művelet",
-          "temperature_sensor": "Szobahőmérséklet érzékelő (opcionális)",
-          "use_default_state": "Indítás alapbeállításokkal távirányító keret betanítása nélkül"
+          "device_id": "ESPHome IR híd",
+          "temperature_sensor": "Szobahőmérséklet érzékelő (opcionális)"
         }
       }
     },
     "error": {
       "invalid_name": "Adjon meg egy nem üres nevet.",
-      "invalid_service": "Válasszon regisztrált ESPHome send_frame műveletet.",
-      "invalid_receiver": "Válasszon létező ESPHome vett keret érzékelőt."
+      "not_bridge": "Ezen az ESPHome eszközön nincs send_frame művelet. Telepítse a híd firmware-t, és ellenőrizze, hogy az eszköz online."
     },
     "abort": {
-      "already_configured": "Ez a vevő már hozzá van rendelve egy integrációhoz.",
+      "already_configured": "Ez az ESPHome eszköz már hozzá van rendelve egy integrációhoz.",
       "reconfigure_successful": "A híd beállításai frissítve."
     }
   },

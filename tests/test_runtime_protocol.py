@@ -9,9 +9,13 @@ from custom_components.webasto_cool_top_trail.protocol import (
     decode_pulses,
     default_frame,
     encode_pulses,
+    interpret_payload,
     mutate_frame,
     parse_frame,
+    validate_payload,
 )
+
+from .test_init import FRAME
 
 
 @pytest.mark.parametrize(
@@ -70,6 +74,78 @@ async def test_semantic_validation_rejects_valid_checksum_invalid_clock():
     frame[7] = checksum(bytes(frame[:8])) << 4
     with pytest.raises(ValueError, match="clock"):
         parse_frame(frame.hex())
+
+
+@pytest.mark.parametrize(
+    "index,value,message",
+    [
+        (10, 0x01, "Unsupported power code"),
+        (1, 0x13, "Unsupported mode or fan code"),
+        (1, 0x38, "Unsupported mode or fan code"),
+        (6, 0x15, "Unsupported Celsius setpoint"),
+        (6, 0x31, "Unsupported Celsius setpoint"),
+        (8, 0x60, "Invalid clock or timer value"),
+        (4, 0xA4, "Invalid timer hour"),
+        (2, 0x1A, "Invalid BCD value"),
+    ],
+)
+async def test_parse_frame_rejects_semantic_errors(index, value, message):
+    frame = bytearray.fromhex(FRAME)
+    frame[index] = value
+    for start in (0, 8):
+        frame[start + 7] = (checksum(bytes(frame[start : start + 8])) << 4) | (
+            frame[start + 7] & 15
+        )
+    validate_payload(bytes(frame))
+    with pytest.raises(ValueError, match=message):
+        parse_frame(frame.hex())
+
+
+def test_checksum_rejects_wrong_length():
+    with pytest.raises(ValueError, match="eight bytes"):
+        checksum(bytes(7))
+
+
+@pytest.mark.parametrize("index,section", [(7, 1), (15, 2)])
+def test_validate_payload_rejects_bad_checksum(index, section):
+    frame = bytearray.fromhex(FRAME)
+    frame[index] ^= 0x10
+    with pytest.raises(ValueError, match=f"Invalid checksum in section {section}"):
+        validate_payload(bytes(frame))
+
+
+@pytest.mark.parametrize(
+    "index,duration,message",
+    [(2, 500, "Unrecognized data mark"), (3, -2000, "Unrecognized or ambiguous bit")],
+)
+async def test_decode_pulses_rejects_invalid_data_duration(index, duration, message):
+    pulses = encode_pulses(bytes.fromhex(FRAME))
+    pulses[index] = duration
+    with pytest.raises(ValueError, match=message):
+        decode_pulses(pulses)
+
+
+def test_interpret_payload_reports_unknown_power_as_none():
+    frame = bytearray.fromhex(FRAME)
+    frame[10] = 0x01
+    frame[15] = (checksum(bytes(frame[8:])) << 4) | (frame[15] & 15)
+    assert interpret_payload(bytes(frame))["hvac_mode"] is None
+
+
+@pytest.mark.parametrize(
+    "mode,fan_mode,message",
+    [
+        ("fan_only", "auto", "Auto fan"),
+        ("heat_cool", "auto", "Auto fan"),
+        ("dry", "auto", "Dry mode uses low fan"),
+        ("dry", "medium", "Dry mode uses low fan"),
+        ("dry", "high", "Dry mode uses low fan"),
+    ],
+)
+async def test_protocol_rejects_fan_speed_for_mode(mode, fan_mode, message):
+    frame = mutate_frame(bytes.fromhex(FRAME), time(12), hvac_mode=mode)
+    with pytest.raises(ValueError, match=message):
+        mutate_frame(frame, time(12), fan_mode=fan_mode)
 
 
 async def test_turn_off_preserves_sleep_and_operating_mode():
