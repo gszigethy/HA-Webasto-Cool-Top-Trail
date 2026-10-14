@@ -7,6 +7,7 @@ from unittest.mock import patch
 import pytest
 from homeassistant.exceptions import HomeAssistantError
 
+from custom_components.webasto_cool_top_trail.climate import WebastoClimate
 from custom_components.webasto_cool_top_trail.protocol import (
     checksum,
     default_frame,
@@ -149,11 +150,13 @@ async def test_optional_temperature_sensor_units_and_invalid_values(hass):
     hass.states.async_set("sensor.room", "77", {"unit_of_measurement": "°F"})
     await hass.async_block_till_done()
     assert hass.states.get("climate.caravan_ac").attributes["current_temperature"] == 25
-    hass.states.async_set("sensor.room", "nan", {"unit_of_measurement": "°C"})
-    await hass.async_block_till_done()
-    assert (
-        hass.states.get("climate.caravan_ac").attributes["current_temperature"] is None
-    )
+    for value in ("nan", "not a number"):
+        hass.states.async_set("sensor.room", value, {"unit_of_measurement": "°C"})
+        await hass.async_block_till_done()
+        assert (
+            hass.states.get("climate.caravan_ac").attributes["current_temperature"]
+            is None
+        )
 
 
 async def test_corrupt_remote_frame_and_fahrenheit_control(hass):
@@ -193,6 +196,105 @@ async def test_temperature_service_quantizes_native_celsius_step(hass):
         hass, "climate", "set_temperature", "climate.caravan_ac", temperature=23.5
     )
     assert parse_frame(send.call_args.args[0].data["frame"])[6] == 0x24
+
+
+@pytest.mark.parametrize("fan_mode", ["auto", "low", "medium", "high"])
+async def test_fan_mode_service(hass, fan_mode):
+    _, send = await setup_bridge(hass)
+    await call(hass, "climate", "set_fan_mode", "climate.caravan_ac", fan_mode=fan_mode)
+    frame = parse_frame(send.call_args.args[0].data["frame"])
+    assert interpret_payload(frame)["fan_mode"] == fan_mode
+    send.assert_called_once()
+
+
+@pytest.mark.parametrize(
+    "mode,fan_mode",
+    [
+        ("fan_only", "auto"),
+        ("heat_cool", "auto"),
+        ("dry", "auto"),
+        ("dry", "medium"),
+        ("dry", "high"),
+    ],
+)
+async def test_fan_mode_service_rejects_unsupported_speed(hass, mode, fan_mode):
+    entry, send = await setup_bridge(hass)
+    await call(hass, "climate", "set_hvac_mode", "climate.caravan_ac", hvac_mode=mode)
+    frame = entry.runtime_data.frame
+    send.reset_mock()
+    with pytest.raises(HomeAssistantError):
+        await call(
+            hass, "climate", "set_fan_mode", "climate.caravan_ac", fan_mode=fan_mode
+        )
+    assert entry.runtime_data.frame == frame
+    send.assert_not_called()
+
+
+async def test_dry_mode_accepts_low_fan_service(hass):
+    _, send = await setup_bridge(hass)
+    await call(hass, "climate", "set_hvac_mode", "climate.caravan_ac", hvac_mode="dry")
+    send.reset_mock()
+    await call(hass, "climate", "set_fan_mode", "climate.caravan_ac", fan_mode="low")
+    frame = parse_frame(send.call_args.args[0].data["frame"])
+    assert interpret_payload(frame)["fan_mode"] == "low"
+    send.assert_called_once()
+
+
+async def test_temperature_service_changes_mode_in_one_frame(hass):
+    _, send = await setup_bridge(hass)
+    await call(
+        hass,
+        "climate",
+        "set_temperature",
+        "climate.caravan_ac",
+        temperature=22,
+        hvac_mode="cool",
+    )
+    send.assert_called_once()
+    frame = parse_frame(send.call_args.args[0].data["frame"])
+    state = interpret_payload(frame)
+    assert state["hvac_mode"] == "cool"
+    assert state["target_temperature_c"] == 22
+
+
+@pytest.mark.parametrize("temperature", [15, 31, float("nan")])
+async def test_temperature_service_rejects_invalid_target(hass, temperature):
+    entry, send = await setup_bridge(hass)
+    with pytest.raises(HomeAssistantError):
+        await call(
+            hass,
+            "climate",
+            "set_temperature",
+            "climate.caravan_ac",
+            temperature=temperature,
+        )
+    assert entry.runtime_data.frame == bytes.fromhex(FRAME)
+    send.assert_not_called()
+
+
+async def test_fan_only_rejects_temperature_service(hass):
+    entry, send = await setup_bridge(hass)
+    await call(
+        hass, "climate", "set_hvac_mode", "climate.caravan_ac", hvac_mode="fan_only"
+    )
+    frame = entry.runtime_data.frame
+    send.reset_mock()
+    with pytest.raises(HomeAssistantError):
+        await call(
+            hass, "climate", "set_temperature", "climate.caravan_ac", temperature=22
+        )
+    assert entry.runtime_data.frame == frame
+    send.assert_not_called()
+
+
+@pytest.mark.parametrize("data", [{}, {"temperature": 15}, {"temperature": 31}])
+async def test_climate_temperature_guards(hass, data):
+    entry, send = await setup_bridge(hass)
+    climate = WebastoClimate(entry.runtime_data)
+    with pytest.raises(HomeAssistantError, match="required|between 16 and 30"):
+        await climate.async_set_temperature(**data)
+    assert entry.runtime_data.frame == bytes.fromhex(FRAME)
+    send.assert_not_called()
 
 
 async def test_timeout_does_not_advance_state_or_retry(hass):
