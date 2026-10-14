@@ -1,146 +1,255 @@
-# Installation and operation
+# Install and use Webasto Cool Top Trail
 
-## Does this require a physical remote?
+This guide takes you from an ESP32 with infrared hardware to an air-conditioner control in Home Assistant. You do not need to understand the IR protocol or record every remote button.
 
-No. This integration implements a fixed CARRIER_AC128 protocol and generates
-complete state packets; it does not learn separate button waveforms. There is
-no IR pairing with the appliance. For the supported Webasto Cool Top Trail
-profile, a transmitter-only installation can use the optional default state
-without owning or capturing a remote. Enable **Use default state** during setup;
-no command is sent until you operate a control. The default uses Celsius.
+The integration is still in development. Its software and recorded remote signals have been tested, but generated commands have not yet been checked on the actual air conditioner. Support for other Houghton models is not confirmed.
 
-Receiving a physical remote frame is optional. It supplies a full-state template
-so commands preserve its display unit, timer values and unknown flags, and lets
-HA follow subsequent physical remote commands. Without a received frame or an
-explicitly enabled default state, controls wait for initialization. This is a
-software initialization policy, not an appliance pairing requirement.
+## How it works
 
-A receiver detects remote commands, not feedback from the air conditioner.
-Protocol support is verified from this remote's recordings; generated commands
-still need appliance acceptance testing. Sharing the CARRIER_AC128 wire format
-alone does not establish compatibility with every Houghton or Carrier model.
+Home Assistant tells your ESP32 what settings to send. The ESP32's infrared transmitter sends them to the air conditioner, like the handheld remote does.
 
-## Prepare ESPHome
+There are two pieces to install:
 
-Copy `esp32/bridge.example.yaml` and `esp32/webasto_ir.h` into the same ESPHome
-configuration directory. ESPHome's `includes` copies the header into the build.
-Use ESPHome 2026.9.1 or newer. Choose the actual board and GPIOs before flashing.
-The debugging ESP is ESP32-PICO-D4 with 4 MB flash, RX32/TX26. The existing
-caravan prototype has TX2; RX23 was only a commented example, not verified wiring.
+| Piece | Where it runs | What it does |
+| --- | --- | --- |
+| ESPHome configuration | On your ESP32 | Connects to Wi-Fi and sends infrared commands |
+| Webasto Cool Top Trail integration | In Home Assistant, installed through HACS | Adds the climate control, timers, and other controls |
 
-Set local `secrets.yaml` using the keys in `esp32/secrets.example.yaml`. Generate
-a private native-API encryption key; the committed example key is for validation
-only. Set device/friendly names, board, receiver and transmitter pin substitutions.
-Keep existing unrelated caravan functionality when merging the transport.
-Remove the old AC select, slider, buttons and fixed-pulse automations so they do
-not compete with the full-state climate controller. Preserve them in your own
-backup if you need rollback. This repository has not modified that deployed ESP.
+An **IR transmitter** is the part that sends infrared light. An **IR receiver** is an optional part that listens to the handheld remote. A receiver helps Home Assistant follow remote changes; it does not receive status reports from the air conditioner.
+
+There is no pairing with the air conditioner and no button-by-button learning. The integration already knows how to build commands for the supported remote protocol.
+
+## Before you start
+
+You need:
+
+- Home Assistant 2026.10.1 or newer, with HACS installed.
+- ESPHome 2026.9.1 or newer. You can manage the ESP32 using ESPHome Device Builder or the ESPHome command-line tool.
+- An ESP32 with a working IR transmitter and a suitable power supply.
+- The GPIO number connected to your transmitter. If you also have a receiver, you need its GPIO number too.
+- Wi-Fi credentials for the ESP32's location.
+
+GPIO numbers identify connection pins on the ESP32. They are board-specific: the numbers in our example are not instructions for every board. This repository does not supply a universal wiring diagram or transmitter circuit; use the wiring instructions for your hardware.
+
+**Already have an ESPHome IR transmitter?** It still needs this project's sending action. An existing setup that sends a few fixed button recordings will not provide everything this integration needs. Back up its configuration before changing it, and retain any unrelated functions on that ESP32.
+
+Choose your setup:
+
+| Your hardware | What to do |
+| --- | --- |
+| Transmitter only | Follow the steps below, omit the receiver section, and enable default starting settings during setup |
+| Transmitter and receiver | Keep the receiver section; you can initialize settings by pressing a button on the handheld remote |
+
+## 1. Prepare the ESP32
+
+### Get the two required files
+
+Open these files in the repository and download their contents:
+
+- [bridge.example.yaml](../esp32/bridge.example.yaml): the ESPHome device configuration.
+- [webasto_ir.h](../esp32/webasto_ir.h): the code that reads and writes the infrared signals. You do not need to edit this file.
+
+Put them in the same ESPHome configuration folder. In ESPHome Device Builder, this is the folder containing your device YAML files, commonly `/config/esphome`. Creating a device in Device Builder gives you a YAML file to edit; place the example's contents in that file and upload `webasto_ir.h` alongside it using your usual file editor or file access tool.
+
+The YAML line `includes: - webasto_ir.h` tells ESPHome to use the companion file. Downloading only the YAML is not enough.
+
+### Set your device name and pins
+
+At the top of the YAML, change the following values to suit your hardware:
+
+```yaml
+substitutions:
+  device_name: webasto-ir-bridge
+  friendly_name: Webasto IR Bridge
+  receiver_pin: GPIO32
+  transmitter_pin: GPIO26
+```
+
+- `device_name` is the ESP32's network name. Keeping `webasto-ir-bridge` makes the examples later in this guide match your setup.
+- `friendly_name` is the name you will see in Home Assistant.
+- `transmitter_pin` must match the pin connected to your IR transmitter.
+- `receiver_pin` must match your receiver, if fitted.
+
+The example uses GPIO26 for sending and GPIO32 for receiving because those were used on the debugging hardware. They are not universal defaults. The original caravan prototype used GPIO2 for sending.
+
+Also check the `esp32` board setting against your board. The example uses `esp32dev` with the ESP-IDF framework.
+
+**If you have no receiver:** delete the entire `remote_receiver:` section, including its indented contents. Keep the `text_sensor:` section, both sensors inside it, and the `api:` sending action. The unused `receiver_pin` substitution can be removed too.
+
+**If updating an existing ESPHome device:** merge the example's IR code and sending action into your configuration. Do not paste duplicate top-level `api:`, `esphome:`, or other sections; add their contents to the sections you already have. Stop using the old fixed-command buttons or automations to control the AC once you switch to the new climate control.
+
+### Add Wi-Fi details and an encryption key
+
+In the same folder, add these entries to `secrets.yaml`, using your own values:
+
+```yaml
+caravan_wifi_ssid: "YOUR_WIFI_NAME"
+caravan_wifi_password: "YOUR_WIFI_PASSWORD"
+api_encryption_key: "YOUR_ESPHOME_API_ENCRYPTION_KEY"
+```
+
+The API encryption key protects the connection between Home Assistant and your ESP32. Use the key generated for your device by ESPHome Device Builder, or retain its existing key when updating a device. It is not your Wi-Fi password. Do not use the placeholder key in this repository's example secrets file.
+
+If your existing configuration uses different secret names, either change the YAML references to match them or add the three entries above. Keep your real credentials private.
+
+### Install the configuration on the ESP32
+
+In ESPHome Device Builder, validate the device configuration, then use **Install** to build and install it. A new device usually needs its first installation over USB; an existing connected ESPHome device can use a wireless update. Installing firmware replaces what currently runs on the ESP32.
+
+If you use the command line instead:
 
 ```bash
 esphome config bridge.example.yaml
 esphome compile bridge.example.yaml
-# When you choose to deploy:
 esphome upload bridge.example.yaml
 ```
 
-The bridge enables Wi-Fi, encrypted native API and ESPHome OTA. No new HA YAML
-helpers, MQTT broker, HTTP endpoint, or custom ESPHome climate component is needed.
-Pair the device with built-in ESPHome. Its API action is
-`esphome.webasto_ir_bridge_send_frame` with a `frame` string parameter. ESPHome
-converts hyphens in the node name to underscores for the action name. Received
-and transmitted frame text sensors appear as HA sensor entities.
+Replace `bridge.example.yaml` with your actual YAML filename if you renamed it.
 
-The action validates header/length/checksums, transmits at nominal 38 kHz, waits
-300 ms for the nonblocking RMT completion, checks transmitter status, and returns
-native API success/error. HA waits for this response. It confirms local handling,
-not IR reception by the air conditioner. Use the documented bridge action rather
-than substituting an unrelated service with a similar name.
+**Before continuing:** the ESP32 should be connected to Wi-Fi and shown as online in ESPHome. You have installed the sending firmware, but have not yet added the Webasto climate control.
 
-The receiver assembles both halves using a 30 ms idle interval, a 64 KB buffer,
-and 50 μs filter. Its standalone codec rejects incomplete/extra-edge frames,
-wrong framing, ambiguous bits and checksum failures. No raw noise is published
-to HA; only valid 16-byte frames are published. A receiver can hear its own
-transmitter, which is still an observed command rather than appliance feedback.
+## 2. Connect the ESP32 to Home Assistant
 
-## Transmitter-only installation
+Open **Settings → Devices & services** in Home Assistant.
 
-If there is no receiver on the caravan ESP, remove the `remote_receiver` section;
-keep both text sensors and the send action. The Received IR frame entity remains
-unknown while the API is connected and becomes unavailable on disconnect. Select
-it as the connection marker, and enable **default starting settings** in the
-custom integration UI. Use default settings only when you accept initializing
-requested state without learning the physical remote: power off, cool mode,
-24 °C, auto fan, display on, panel unlocked, Sleep off, timers disabled, stored
-ON/OFF times 09:00/10:00, unknown bits zero. Opting in does not send a command.
-The first explicit control applies that complete profile to the appliance.
+If the ESP32 is discovered, add it using the **ESPHome** integration. Otherwise, choose **Add integration → ESPHome** and enter the ESP32's hostname or IP address. If asked for the encryption key, use the same API key you put in `secrets.yaml`.
 
-A receiver on a separate ESP can also supply frames. The sender and receiver
-must serve the same AC. Availability requires the selected receiver sensor to
-exist and not be unavailable, and the selected sender action to be registered;
-native-API failures at send time are also reported. A separate receiver does
-not provide transmitter-device availability telemetry on its own.
+Open the new ESPHome device. With the default friendly name, you should find:
 
-Without a receiver, physical remote changes and automatic timer events cannot
-be tracked. Future HA commands use the last commanded profile and may overwrite
-changes made elsewhere. The integration saves the last frame across reloads.
+- **Webasto IR Bridge Received IR frame**
+- **Webasto IR Bridge Transmitted IR frame**
 
-## Install HACS integration
+These are diagnostic sensors. A “frame” means one complete infrared command. Their contents are technical data used by the integration; you do not need to read or edit them.
 
-Add this repository as type Integration in HACS, install, restart HA, and add
-Webasto Cool Top Trail via Devices & services. Select the correct Received IR
-frame sensor and send_frame action. Choose an optional existing temperature
-sensor with °C or °F measurements. There is no room sensor in the IR protocol.
+Both may initially show **Unknown**. That is normal before any command has been received or sent. **Unavailable** means Home Assistant cannot currently access the device or sensor.
 
-For manual installation, copy `custom_components/webasto_cool_top_trail` into
-`config/custom_components`, restart, then use the same UI flow. Do not configure
-this custom integration in `configuration.yaml`.
+The ESP32 also provides a sending action. To check it, open **Developer tools → Actions** and search for `send_frame`. With the example device name, the action is:
 
-Each receiver entity can be assigned once; multiple AC bridges have independent
-entries, devices, saved frames and commands. Reconfigure from the entry menu to
-change bindings, name, default-profile option or room sensor. Omit the optional
-room sensor to remove it. Existing version 0.0.1 scaffold entries keep their
-entry/entity identity but require **Reconfigure** to select transport bindings.
-No climate control is silently attached during migration.
+```text
+esphome.webasto_ir_bridge_send_frame
+```
 
-## Operation and recovery
+You do not need to run this action yourself. The Webasto integration will use it. If it is missing, check that the ESP32 is connected and that you installed the bridge configuration, rather than the separate research/capture firmware.
 
-With a receiver and no saved/default frame, controls stay unavailable until a
-valid physical-remote command arrives. Set the remote to Celsius before learning
-if you intend to adjust temperature. Ready means transport plus a valid template;
-it does not mean the AC has acknowledged it. A disconnected bridge makes control
-entities unavailable, retains its template and sends nothing on reconnect.
+## 3. Download the integration through HACS
 
-The primary climate entity uses HA standard services. Changing temperature while
-off leaves power off. Turn on resumes the packet's stored operating mode. A
-combined set_temperature request with hvac_mode is one full-state transmission.
-HA unit conversion happens before rounding to the AC's nearest whole Celsius
-setpoint; out-of-range values are rejected. Target temperature is absent in fan
-mode. No speculative compressor `hvac_action` is reported.
+1. Open **HACS** and its menu for **Custom repositories**.
+2. Enter `https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail`.
+3. Choose **Integration** as the category and add it.
+4. Find **Webasto Cool Top Trail** in HACS and download it. While no release is published, use the `main` version if prompted.
+5. Restart Home Assistant.
 
-On/off schedules belong to the appliance, using local wall-clock HH:MM without
-seconds. Every explicit send synchronizes its clock with HA; the Synchronize
-clock button makes that an explicit action. There is no background clock sync
-or automatic HA schedule evaluation. Timers retain their times while disabled.
-The receiver cannot observe the appliance starting itself when a timer fires,
-and HA does not predict a state transition. Daylight-saving or timezone changes
-require a subsequent command/clock sync; schedules have no timezone/DST field.
+Downloading through HACS installs the Home Assistant part. It does not install or update your ESP32 firmware.
 
-## Troubleshooting
+If you do not use HACS, copy the repository's `custom_components/webasto_cool_top_trail` folder into Home Assistant's `config/custom_components` folder and restart. The remaining steps are the same. You do not need to add this integration to `configuration.yaml`.
 
-| Symptom | Check |
+## 4. Add Webasto Cool Top Trail
+
+Go to **Settings → Devices & services → Add integration**, search for **Webasto Cool Top Trail**, and open it.
+
+Fill in the fields as follows:
+
+| Field shown in setup | What to choose |
 | --- | --- |
-| No send action in selector | Pair ESPHome; confirm bridge firmware has `api.actions.send_frame`; check its connection |
-| Awaiting remote frame | Point a Celsius remote at the receiver; check pin/inversion and receiver position |
-| Disconnected | Check Wi-Fi, API pairing/encryption, selected sensor/action and entity availability |
-| Temperature units | Both remote profiles support target edits; HA converts its display units to the learned profile |
-| Unknown room temperature | Configure an actual room sensor; confirm numeric °C/°F state and connectivity |
-| Some presses missing | Capture firmware raw logs; bad timing/extra edges are rejected; avoid changing tolerances to accept noise |
-| HA settings change but AC does not | Check TX GPIO, emitter drive/carrier/position, supply, and AC response; local API success is not optical proof |
-| Timer appears active at normal clock | ON/OFF icons remain after editing timeout; clock display alone does not mean disabled |
+| **Name** | A name for your AC, such as “Caravan AC” |
+| **ESPHome received IR frame sensor** | The **Received IR frame** sensor belonging to the ESP32 you connected in step 2. Do not select a room-temperature sensor or **Transmitted IR frame** |
+| **ESPHome send_frame action** | The action belonging to your IR sender, for example `esphome.webasto_ir_bridge_send_frame` |
+| **Use default starting settings (transmitter only)** | Turn this on if you have no IR receiver. With a receiver, leave it off if you want to start from the handheld remote's settings |
+| **Room temperature sensor (optional)** | An existing sensor that measures the temperature inside your caravan in °C or °F. Leave it empty if you do not have one |
 
-Protocol status diagnostics expose the template, source (`unknown`, `default`,
-`received`, `commanded`, `restored`), and session receive/command timestamps.
-These timestamps are HA observation times; bytes 2/3/14 are the remote/device
-clock and can be several minutes different. Avoid sharing device/network secrets
-when reporting logs. See the physical acceptance checklist before relying on
-unattended appliance control.
+### Why select “Received IR frame” if you have no receiver?
+
+The current setup also uses this sensor to identify whether the ESPHome connection is available. That is why the sensor must stay in the ESPHome configuration even without receiver hardware.
+
+Select it even if its value is **Unknown**. With default starting settings enabled, the integration can send commands without ever receiving a remote command. You do not need to enter any IR data yourself.
+
+### What are the default starting settings?
+
+They give Home Assistant an initial set of settings when it has not heard the remote:
+
+- Power off; cooling mode ready for the next turn-on.
+- 24 °C, automatic fan, Sleep off.
+- Panel display on and panel controls unlocked.
+- Both timers disabled, with stored on/off times of 09:00 and 10:00.
+
+**Enabling this option does not send anything to the AC.** Your first operation of a control sends the complete set of settings, including the defaults you have not changed. For example, turning on starts cooling at 24 °C with automatic fan.
+
+The integration remembers subsequent settings across Home Assistant restarts. Default settings are the starting point, not a reset on every restart.
+
+## 5. Try the climate control
+
+After setup, open the **Webasto Cool Top Trail** device in Home Assistant. It has a climate control plus switches, timer times, a clock button, and a status sensor.
+
+**If using a receiver without default settings:** point the handheld remote at the receiver and press a normal AC button. The integration reads its settings and makes the climate control available. Celsius and Fahrenheit remote settings are both supported.
+
+**If using a transmitter alone:** the climate control should become available once the ESP32 is connected and default starting settings are enabled.
+
+Place the transmitter so its infrared light can reach the air conditioner's receiver. Try a simple operation, such as turning the AC on, and check the appliance itself for a response. A change on the Home Assistant card alone does not prove the AC received the command.
+
+Add the climate entity to your dashboard if you want quick access. The other controls are available on the device page and can also be added to a dashboard or automation.
+
+## Everyday use
+
+### Temperature, modes, and fan
+
+Use the climate control to turn the AC on or off, choose its mode, set the temperature, and choose the fan speed.
+
+- The remote's automatic operating mode appears as **Heat/cool** in Home Assistant. It uses one target temperature.
+- **Auto fan** is a separate setting, available in heating and cooling.
+- **Dry** uses low fan speed.
+- **Fan only** has no temperature setting.
+- **Sleep** is available during heating and cooling.
+- Turning off keeps your other settings. Turning on resumes the stored mode.
+- Changing the temperature while the climate entity is off keeps it off.
+
+Home Assistant displays temperatures in your preferred units. Commands retain the remote's Celsius or Fahrenheit setting, in one-degree steps: 16–30 °C or 60–86 °F. There is no separate control for changing the AC's display between °C and °F; use the handheld remote for that. If a receiver hears the change, the integration follows it.
+
+A current room temperature is only shown if you selected a real temperature sensor. The remote signal does not contain a room-temperature measurement.
+
+### Panel display and lock
+
+**Panel display** controls the display on the air conditioner's air-distribution panel. **Panel control lock** locks or unlocks that panel's touch controls.
+
+### On/off timers
+
+Set **On time** or **Off time**, then enable the corresponding **On timer** or **Off timer** switch. Both can be enabled. Disabling a timer keeps its stored time for later use.
+
+These are the air conditioner's own daily timers, using local hours and minutes. Home Assistant sends the current local clock whenever you operate a control. The **Synchronize clock** button sends the clock without changing your other settings; use it after a timezone or daylight-saving change.
+
+Home Assistant cannot see the AC switching itself on or off when a timer fires, so the climate card may still show the last commanded state. It also does not run these timers itself. The physical AC's timer behavior remains part of the pending appliance tests.
+
+### Using the handheld remote as well
+
+With a receiver, commands that it hears update Home Assistant's settings. The receiver needs to be positioned where it can see the remote's infrared light.
+
+Without a receiver, Home Assistant cannot know about changes made using the remote. Its next command sends all of its saved settings and may overwrite those changes. This is also possible if a fitted receiver misses a remote press.
+
+The system never receives confirmation of actual cooling, heating, compressor operation, or appliance faults over IR.
+
+## If something does not work
+
+| What you see | What to try |
+| --- | --- |
+| No **Received IR frame** sensor | Confirm you installed the bridge configuration and added the ESP32 through Home Assistant's ESPHome integration. Keep the sensor even without receiver hardware |
+| No `send_frame` action | Check that the ESP32 is online and its configuration includes the example's `api:` sending action |
+| **Awaiting remote frame** | With a receiver, point the remote at it and press a button. With no receiver, enable default starting settings through **Reconfigure** |
+| **Bridge disconnected**, or unavailable controls | Check power, Wi-Fi, the ESPHome connection, and that setup points to the correct sensor and sending action |
+| **Received IR frame** shows **Unknown** | Normal without a receiver. With a receiver, no valid remote command has been heard yet |
+| Current temperature is missing | Choose an actual room-temperature sensor in setup; check that it is available and reports °C or °F |
+| The Home Assistant card changes but the AC does not | Check the transmitter wiring and GPIO, power supply, and its position relative to the AC. Confirm it is a working IR transmitter |
+| Remote presses do not update Home Assistant | Check receiver wiring and position. Incomplete or noisy commands are ignored |
+| The card does not change when an AC timer fires | Expected: the appliance does not report timer events back to Home Assistant |
+
+The **Protocol status** sensor helps distinguish a disconnected ESP32 from a connected system waiting for its first remote command. **Ready** means the integration has a connection and settings it can send; it does not mean the air conditioner has confirmed anything.
+
+To change your choices, open **Settings → Devices & services**, find the Webasto integration entry, and choose **Reconfigure** from its menu. You can change the selected sensor/action, name, default-settings option, or room-temperature sensor. Clear the optional room sensor to remove it.
+
+If reporting a problem, include your AC/remote model, ESP32 board, transmitter/receiver pins, ESPHome version, and what happened at the appliance. Remove passwords and encryption keys from any configuration or logs you share.
+
+## More detail
+
+- [Controls and automation examples](entity-map.md)
+- [ESPHome files and capture tools](../esp32/README.md)
+- [IR protocol](ir-protocol.md)
+- [Functional design](functional-design.md) and [technical design](technical-design.md)
+- [Software checks and physical appliance tests](validation.md)
