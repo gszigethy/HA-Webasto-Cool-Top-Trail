@@ -70,7 +70,7 @@ async def test_setup_reload_unload(hass):
     assert entry.state is ConfigEntryState.LOADED
     registry = er.async_get(hass)
     entities = er.async_entries_for_config_entry(registry, entry.entry_id)
-    assert len(entities) == 9
+    assert len(entities) == 8
     assert hass.states.get("climate.caravan_ac").state == "heat"
     send.assert_not_called()
     ids = {e.entity_id for e in entities}

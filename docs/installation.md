@@ -179,7 +179,7 @@ The integration remembers subsequent settings across Home Assistant restarts. De
 
 ## 5. Try the climate control
 
-After setup, open the **Webasto Cool Top Trail** device in Home Assistant. It has a climate control plus switches, timer times, a clock button, and a status sensor.
+After setup, open the **Webasto Cool Top Trail** device in Home Assistant. It has a climate control plus switches, timer times, and a status sensor.
 
 **If using a receiver:** point the handheld remote at the receiver and press a normal AC button. The integration reads its settings and makes the climate control available. Celsius and Fahrenheit remote settings are both supported.
 
@@ -215,7 +215,7 @@ A current room temperature is only shown if you selected a real temperature sens
 
 Set **On time** or **Off time**, then enable the corresponding **On timer** or **Off timer** switch. Both can be enabled. Disabling a timer keeps its stored time for later use.
 
-These are the air conditioner's own daily timers, using local hours and minutes. Home Assistant sends the current local clock whenever you operate a control. The **Synchronize clock** button sends the clock without changing your other settings; use it after a timezone or daylight-saving change.
+These are the air conditioner's own daily timers, using local hours and minutes. Every command Home Assistant sends refreshes the appliance clock from HA local time. There is no separate clock-sync action.
 
 Home Assistant cannot see the AC switching itself on or off when a timer fires, so the climate card may still show the last commanded state. It also does not run these timers itself. The physical AC's timer behavior remains part of the pending appliance tests.
 

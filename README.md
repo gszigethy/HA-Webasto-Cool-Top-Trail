@@ -11,7 +11,7 @@ Control your Houghton-made Webasto Cool Top Trail caravan or motorhome air condi
 - The air conditioner's panel display and panel control lock.
 - Its daily on/off timers.
 
-These appear as one climate control and a few additional controls. An optional room-temperature sensor can show the current temperature.
+These appear as one climate control and a few additional controls. An optional room-temperature sensor can show the current temperature. Every command Home Assistant sends refreshes the appliance clock from HA local time; there is no separate clock-sync action.
 
 ## What you need
 

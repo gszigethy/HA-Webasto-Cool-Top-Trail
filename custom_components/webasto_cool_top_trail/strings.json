@@ -52,11 +52,6 @@
         "name": "Off time"
       }
     },
-    "button": {
-      "sync_clock": {
-        "name": "Synchronize clock"
-      }
-    },
     "sensor": {
       "protocol_status": {
         "name": "Protocol status",
