@@ -25,9 +25,8 @@ physical appliance claims additionally require recorded acceptance tests.
 
 ## Releases
 
-No release is published yet. HACS can download the development implementation
-from `main`.
-For a future release:
+Published releases are listed on GitHub; HACS installs them by tag. For a new
+release:
 
 1. Update `manifest.json` and `pyproject.toml` to the same version.
 2. Add concrete changes and hardware validation limits to `CHANGELOG.md`.

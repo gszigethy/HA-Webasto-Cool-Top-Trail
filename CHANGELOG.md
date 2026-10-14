@@ -1,20 +1,25 @@
 # Changelog
 
-## Unreleased
+## 1.0.0 — 2026-10-14
+
+First stable release for Houghton-made Webasto Cool Top Trail air conditioners.
+Changes since 1.0.0 beta 1:
 
 - Controls are available immediately, with or without an IR receiver, starting
   from off, heat/cool, 22 °C, high fan. With a receiver, remote use replaces the
   settings. The "Awaiting remote frame" status is removed.
-- Fetch the ESPHome IR codec automatically from GitHub as an external component;
-  no header file needs to be placed manually.
-- One self-contained device YAML (`esp32/example.yaml`) with the sending
-  action, sensors and optional receiver; no remote YAML packages and no
-  separate secrets, receiver or bridge YAML files. Research YAML moved to
+- One self-contained ESPHome device YAML (`esp32/example.yaml`) with comments on
+  what to change and remove. ESPHome fetches only the IR codec
+  (`webasto_ir.h`) from GitHub as an external component; no header file or
+  remote YAML package needs to be placed or referenced. Research YAML moved to
   `captures/`.
 - Simpler, beginner-friendly README with the full device YAML.
-- Show the Webasto "W" logo as the integration icon in Home Assistant
+- The Webasto "W" logo is shown as the integration icon in Home Assistant
   (from the CC0 [Webasto Logo 2024.svg](https://commons.wikimedia.org/wiki/File:Webasto_Logo_2024.svg)).
 
+Requires Home Assistant 2026.10.1 or newer and ESPHome 2026.9.1 or newer.
+IR state is assumed: neither transmission nor reception proves appliance operation.
+Physical acceptance of generated commands by an actual AC remains unverified.
 
 ## 1.0.0 beta 1 — 2026-10-14
 
