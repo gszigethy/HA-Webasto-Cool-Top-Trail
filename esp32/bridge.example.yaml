@@ -1,43 +1,118 @@
-# M5Stack capture device: ESP32-PICO-D4, 4 MB flash, RX GPIO32 / TX GPIO26.
-# Paste into ESPHome Device Builder. No companion header file is needed.
+# ESPHome bridge for the Webasto Cool Top Trail Home Assistant integration.
+# Paste into ESPHome Device Builder, then set the pins and board for your hardware.
+# Without an IR receiver, delete the two parts marked "Only with an IR receiver".
 substitutions:
   device_name: webasto-ir-bridge
   friendly_name: Webasto IR Bridge
   transmitter_pin: GPIO26
   receiver_pin: GPIO32
-  # Package support was added after beta 1. Use main until a newer release includes it.
-  webasto_ref: main
-
-packages:
-  webasto:
-    url: https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail
-    ref: ${webasto_ref}
-    files:
-      - esp32/packages/bridge.yaml
-      - esp32/packages/receiver.yaml  # Remove this line for transmitter-only hardware.
-    refresh: 1d
 
 esphome:
   name: ${device_name}
   friendly_name: ${friendly_name}
+  min_version: 2026.9.1
 
 esp32:
-  # This board configuration also compiled for the ESP32-PICO-D4 capture device.
   board: esp32dev
-  flash_size: 4MB
   framework:
     type: esp-idf
+
+# Downloads only the IR codec (webasto_ir.h); everything else is in this file.
+external_components:
+  - source: github://gszigethy/HA-Webasto-Cool-Top-Trail@main
+    components: [webasto_ir]
+
+webasto_ir:
 
 wifi:
   ssid: !secret caravan_wifi_ssid
   password: !secret caravan_wifi_password
-
-api:
-  encryption:
-    key: !secret api_encryption_key
 
 logger:
   level: INFO
 
 ota:
   - platform: esphome
+
+api:
+  encryption:
+    key: !secret api_encryption_key
+  # Keep running when Home Assistant is out of reach (e.g. while travelling).
+  reboot_timeout: 0s
+  actions:
+    # Keep this name: the integration looks for <device_name>_send_frame.
+    - action: send_frame
+      variables:
+        frame: string
+      then:
+        - if:
+            condition:
+              lambda: |-
+                webasto_ir::Frame bytes;
+                return webasto_ir::parse(frame, bytes);
+            then:
+              - lambda: |-
+                  webasto_ir::Frame bytes;
+                  webasto_ir::parse(frame, bytes);
+                  auto call = id(transmitter_ir).transmit();
+                  call.get_data()->set_data(webasto_ir::encode(bytes));
+                  call.get_data()->set_carrier_frequency(38000);
+                  call.perform();
+              # Longest frame is 251ms; acknowledge after the RMT completion callback.
+              - delay: 300ms
+              - if:
+                  condition:
+                    lambda: |-
+                      return !id(transmitter_ir).is_failed() &&
+                             !id(transmitter_ir).status_has_warning();
+                  then:
+                    - lambda: |-
+                        webasto_ir::Frame bytes;
+                        webasto_ir::parse(frame, bytes);
+                        id(transmitted_frame).publish_state(webasto_ir::format(bytes));
+              - api.respond:
+                  success: !lambda |-
+                    return !id(transmitter_ir).is_failed() &&
+                           !id(transmitter_ir).status_has_warning();
+                  error_message: "IR transmitter reported an error"
+            else:
+              - api.respond:
+                  success: false
+                  error_message: "Invalid CARRIER_AC128 frame"
+
+remote_transmitter:
+  id: transmitter_ir
+  pin: ${transmitter_pin}
+  carrier_duty_percent: 50%
+  non_blocking: true
+
+# Keep these names: the integration finds the sensors by name.
+text_sensor:
+  - platform: template
+    id: transmitted_frame
+    name: Transmitted IR frame
+    entity_category: diagnostic
+    update_interval: never
+  # --- Only with an IR receiver ---
+  - platform: template
+    id: received_frame
+    name: Received IR frame
+    entity_category: diagnostic
+    update_interval: never
+
+# --- Only with an IR receiver ---
+remote_receiver:
+  id: receiver_ir
+  pin:
+    number: ${receiver_pin}
+    inverted: true
+  idle: 30ms
+  buffer_size: 64kb
+  filter: 50us
+  tolerance: 25%
+  on_raw:
+    then:
+      - lambda: |-
+          webasto_ir::Frame bytes;
+          if (webasto_ir::decode(x, bytes))
+            id(received_frame).publish_state(webasto_ir::format(bytes));

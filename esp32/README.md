@@ -7,13 +7,11 @@ For installation, start with the [step-by-step guide](../docs/installation.md). 
 | File | Purpose |
 | --- | --- |
 | [bridge.example.yaml](bridge.example.yaml) | ESPHome configuration for sending AC commands and optionally receiving handheld remote commands |
-| [packages/bridge.yaml](packages/bridge.yaml) | Shared sending action and transport configuration; downloaded automatically |
-| [packages/receiver.yaml](packages/receiver.yaml) | Optional receiver configuration; downloaded automatically |
 | [secrets.example.yaml](secrets.example.yaml) | Example secret names; replace placeholders with private values in your own `secrets.yaml` |
 
-The example uses GPIO26 for the transmitter and GPIO32 for the receiver. **Change these to match your wiring.** For a transmitter-only setup, remove the `esp32/packages/receiver.yaml` line from the package list. The bridge package keeps the **Transmitted IR frame** sensor and sending action. Keep their names: the integration finds them by name.
+The example uses GPIO26 for the transmitter and GPIO32 for the receiver. **Change these to match your wiring.** For a transmitter-only setup, delete the two parts marked *Only with an IR receiver*. Keep the `send_frame` action and sensor names: the integration finds them by name.
 
-ESPHome downloads the codec from [components/webasto_ir](../components/webasto_ir) automatically. The `webasto_ref` substitution chooses both the package and component revision. This support was added after beta 1; the current example uses `main`, and cannot use the beta 1 tag.
+ESPHome downloads the codec from [components/webasto_ir](../components/webasto_ir) automatically. It only provides the codec header; the sending action, sensors and IR hardware are all in the single example YAML. The component was added after beta 1, so the example uses `main`.
 
 The Home Assistant integration provides the climate control. The ESPHome configuration provides the connection and infrared sender; it does not create a second climate entity.
 
