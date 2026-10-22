@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.2 — 2026-10-22
+
+- Update pytest-homeassistant-custom-component to 0.13.373 (Home Assistant
+  2026.10.2), Ruff to 0.17.1, and the pinned Hassfest action.
+- Align the CI Ruff version with the development requirements.
+- Maintenance release with no integration or firmware behavior changes.
+
 ## 1.0.1 — 2026-10-14
 
 - Run every HACS validation check, including brands (the integration ships its
