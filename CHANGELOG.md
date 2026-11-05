@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.4 — 2026-11-05
+
+- Update pytest-homeassistant-custom-component to 0.13.375, Ruff to 0.17.3,
+  and the pinned SonarQube scan action (v8.4.0).
+- Align the CI Ruff version with the development requirements.
+- Maintenance release with no integration or firmware behavior changes.
+
 ## 1.0.3 — 2026-10-28
 
 - Update pytest-homeassistant-custom-component to 0.13.374 (Home Assistant
