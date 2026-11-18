@@ -2,7 +2,7 @@
 
 Control a **Webasto Cool Top Trail** caravan or motorhome air conditioner from Home Assistant, the same way the handheld remote does.
 
-> **Status: beta.** The remote's infrared signals are fully decoded and the software is tested. Commands sent by this integration still need to be confirmed on the air conditioner itself. Please [report](https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail/issues) what works and what doesn't.
+Every control has been tested on a real Webasto Cool Top Trail air conditioner. See [testing status](docs/validation.md).
 
 ## How it works
 
@@ -13,7 +13,7 @@ Home Assistant  ──Wi-Fi──▶  ESP32  ──infrared──▶  air condit
 ```
 
 - An **ESP32** with an **infrared (IR) LED** acts as the remote control. You set it up with ESPHome.
-- This **integration** (installed with HACS) adds the air-conditioner controls to Home Assistant and tells the ESP32 what to send.
+- This **integration** (installed from the Home Assistant Marketplace) adds the air-conditioner controls to Home Assistant and tells the ESP32 what to send.
 - An optional **IR receiver** on the ESP32 lets Home Assistant follow presses on the handheld remote.
 
 Everything runs locally: no cloud and no account. There is no pairing and no button learning.
@@ -31,7 +31,7 @@ Infrared only goes one way. The AC never reports back, so Home Assistant shows t
 
 ## What you need
 
-- **Home Assistant** 2026.10.1 or newer, with **[HACS](https://hacs.xyz/)**.
+- **Home Assistant** 2026.10.1 or newer. From 2026.11 the **Marketplace** is built in; on 2026.10 you need **[HACS](https://hacs.xyz/)**.
 - **ESPHome** 2026.9.1 or newer, for example the ESPHome Device Builder add-on in Home Assistant.
 - An **ESP32** board with an **IR transmitter LED** pointed at the AC.
 - Optional: an **IR receiver** on the same ESP32.
@@ -177,9 +177,20 @@ Go to **Settings → Devices & services**. The ESP32 usually appears as a discov
 
 ### Step 3: Install this integration
 
+Download **Webasto Cool Top Trail** from the Marketplace (or HACS), then **restart Home Assistant**.
+
+<!-- ha-marketplace:exclude-start -->
+Home Assistant 2026.11 or newer:
+
+1. Open **Settings → Marketplace** and search for **Webasto Cool Top Trail**. If it is not listed, add it from a link: `https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail`.
+2. Download it and **restart Home Assistant**.
+
+Home Assistant 2026.10 with HACS:
+
 1. Open **HACS → ⋮ → Custom repositories**.
 2. Add `https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail` with type **Integration**.
 3. Search for **Webasto Cool Top Trail** in HACS, download it, and **restart Home Assistant**.
+<!-- ha-marketplace:exclude-end -->
 
 ### Step 4: Add the air conditioner
 
@@ -228,6 +239,6 @@ More help: [installation guide](docs/installation.md#if-something-does-not-work)
 - **[@mrmees](https://github.com/mrmees)**: the [esphome-houghton-ac](https://github.com/mrmees/esphome-houghton-ac) project and its byte-level analysis of the Houghton protocol ([#2009](https://github.com/crankyoldgit/IRremoteESP8266/issues/2009), [#2247](https://github.com/crankyoldgit/IRremoteESP8266/issues/2247)), the main field-map reference.
 - **[@MarkEvens](https://github.com/MarkEvens)**: the original report that led to `CARRIER_AC128` being identified ([#1797](https://github.com/crankyoldgit/IRremoteESP8266/issues/1797)).
 - **Webasto**: the "W" logo used as the integration icon, from their CC0 [Webasto Logo 2024.svg](https://commons.wikimedia.org/wiki/File:Webasto_Logo_2024.svg).
-- **[Home Assistant](https://www.home-assistant.io/)**, **[ESPHome](https://esphome.io/)** and **[HACS](https://hacs.xyz/)**, which this integration builds on.
+- **[Home Assistant](https://www.home-assistant.io/)**, **[ESPHome](https://esphome.io/)** and **[HACS](https://hacs.xyz/)** (now the Marketplace), which this integration builds on.
 
 Webasto and Cool Top Trail are trademarks of their respective owners. This is an independent community project, not affiliated with or endorsed by Webasto or Houghton.

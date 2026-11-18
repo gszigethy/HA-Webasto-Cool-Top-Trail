@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.1.0 — 2026-11-18
+
+Production ready: every control is now tested on a real air conditioner.
+
+- Tested on a Webasto Cool Top Trail: power, all modes, target temperature,
+  fan speeds, Sleep, panel display, panel lock, both timers and timer
+  execution, and following the handheld remote. Results are recorded in
+  `docs/validation.md`.
+- Removed the beta and "not yet confirmed on the AC" notes from the README and
+  documentation.
+- Installation steps for the Home Assistant Marketplace (built in from
+  Home Assistant 2026.11), with HACS steps kept for 2026.10. The README hides
+  the GitHub-only install steps when shown in the Marketplace.
+- Added the `climate.heat_pumps_air_conditioning` category to the manifest.
+- No integration or firmware behavior changes.
+
 ## 1.0.6 — 2026-11-18
 
 - Update Ruff to 0.17.5 and the pinned SonarQube scan action (v8.5.0).
