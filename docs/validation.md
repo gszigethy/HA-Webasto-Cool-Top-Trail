@@ -19,7 +19,7 @@ configured at the upstream nominal 38 kHz; the demodulating receiver did not
 measure it. Checksums and user labels corroborate accepted frames; rejected frames
 are never repaired to fit expectations.
 
-The pre-release CI check on 2026-10-14 passed **288 tests**, with
+The CI check on 2026-10-14 passed **288 tests**, with
 **99.27% integration statement coverage**. Ruff lint/format checks passed, and the
 full ESPHome bridge firmware compiled successfully. See GitHub Actions for
 checks on the current commit.
