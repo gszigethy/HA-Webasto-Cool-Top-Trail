@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.6 — 2026-11-18
+
+- Update Ruff to 0.17.5 and the pinned SonarQube scan action (v8.5.0).
+- Align the CI Ruff version with the development requirements.
+- Maintenance release with no integration or firmware behavior changes.
+
 ## 1.0.5 — 2026-11-12
 
 - Update Ruff to 0.17.4 and the pinned SonarQube scan action (v8.4.1).
