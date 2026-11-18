@@ -2,7 +2,7 @@
 
 This guide takes you from an ESP32 with infrared hardware to an air-conditioner control in Home Assistant. You do not need to understand the IR protocol or record every remote button.
 
-The integration is still in development. Its software and recorded remote signals have been tested, but generated commands have not yet been checked on the actual air conditioner. Support for other Houghton models is not confirmed.
+Every control has been tested on a real Webasto Cool Top Trail air conditioner (see [validation](validation.md)). Other Houghton-made models may work but have not been tested.
 
 ## How it works
 
@@ -13,7 +13,7 @@ There are two pieces to install:
 | Piece | Where it runs | What it does |
 | --- | --- | --- |
 | ESPHome configuration | On your ESP32 | Connects to Wi-Fi and sends infrared commands |
-| Webasto Cool Top Trail integration | In Home Assistant, installed through HACS | Adds the climate control, timers, and other controls |
+| Webasto Cool Top Trail integration | In Home Assistant, installed from the Marketplace (or HACS) | Adds the climate control, timers, and other controls |
 
 An **IR transmitter** is the part that sends infrared light. An **IR receiver** is an optional part that listens to the handheld remote. A receiver helps Home Assistant follow remote changes; it does not receive status reports from the air conditioner.
 
@@ -23,7 +23,7 @@ There is no pairing with the air conditioner and no button-by-button learning. T
 
 You need:
 
-- Home Assistant 2026.10.1 or newer, with HACS installed.
+- Home Assistant 2026.10.1 or newer. 2026.11 and newer have the built-in Marketplace; on 2026.10 you need HACS.
 - ESPHome 2026.9.1 or newer. You can manage the ESP32 using ESPHome Device Builder or the ESPHome command-line tool.
 - An ESP32 with a working IR transmitter and a suitable power supply.
 - The GPIO number connected to your transmitter. If you also have a receiver, you need its GPIO number too.
@@ -133,17 +133,25 @@ esphome.webasto_ir_bridge_send_frame
 
 You do not need to run this action yourself. The Webasto integration will use it. If it is missing, check that the ESP32 is connected and that you installed the bridge configuration, rather than the separate research/capture firmware.
 
-## 3. Download the integration through HACS
+## 3. Download the integration
+
+Home Assistant 2026.11 or newer:
+
+1. Open **Settings → Marketplace** and search for **Webasto Cool Top Trail**.
+2. If it is not listed, add it from a link: `https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail`.
+3. Download it and restart Home Assistant.
+
+Home Assistant 2026.10 with HACS:
 
 1. Open **HACS** and its menu for **Custom repositories**.
 2. Enter `https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail`.
 3. Choose **Integration** as the category and add it.
-4. Find **Webasto Cool Top Trail** in HACS and download it. While no release is published, use the `main` version if prompted.
+4. Find **Webasto Cool Top Trail** in HACS and download it.
 5. Restart Home Assistant.
 
-Downloading through HACS installs the Home Assistant part. It does not install or update your ESP32 firmware.
+Downloading the integration installs the Home Assistant part. It does not install or update your ESP32 firmware.
 
-If you do not use HACS, copy the repository's `custom_components/webasto_cool_top_trail` folder into Home Assistant's `config/custom_components` folder and restart. The remaining steps are the same. You do not need to add this integration to `configuration.yaml`.
+If you use neither the Marketplace nor HACS, copy the repository's `custom_components/webasto_cool_top_trail` folder into Home Assistant's `config/custom_components` folder and restart. The remaining steps are the same. You do not need to add this integration to `configuration.yaml`.
 
 ## 4. Add Webasto Cool Top Trail
 
@@ -212,7 +220,7 @@ Set **On time** or **Off time**, then enable the corresponding **On timer** or *
 
 These are the air conditioner's own daily timers, using local hours and minutes. Every command Home Assistant sends refreshes the appliance clock from HA local time. There is no separate clock-sync action.
 
-Home Assistant cannot see the AC switching itself on or off when a timer fires, so the climate card may still show the last commanded state. It also does not run these timers itself. The physical AC's timer behavior remains part of the pending appliance tests.
+Home Assistant cannot see the AC switching itself on or off when a timer fires, so the climate card may still show the last commanded state. It also does not run these timers itself. The AC's own timers were tested on the appliance.
 
 ### Using the handheld remote as well
 

@@ -4,7 +4,7 @@
 
 ```mermaid
 flowchart LR
-  UI[Home Assistant controls] --> HA[HACS integration: entities + bridge]
+  UI[Home Assistant controls] --> HA[Marketplace/HACS integration: entities + bridge]
   HA -->|complete frame, native API action| ESP[ESPHome bridge]
   ESP -->|38 kHz full-state IR| AC[Cool Top Trail AC]
   Remote[Physical remote] -->|IR| RX[ESPHome receiver codec]
@@ -151,7 +151,7 @@ from the cited wire specification and local measurements. No upstream component
 code is vendored. The historical prototype is sanitized and preserved separately.
 
 CI runs Ruff, isolated HA/codec tests, native C++ replay, ESPHome configuration
-checks and a full bridge compilation, hassfest and HACS validation. Validation
+checks and a full bridge compilation, hassfest and HACS validation (the same checks the Marketplace catalog uses). Validation
 placeholders never connect devices or reveal real secrets. Firmware build caches
 and binaries are ignored; deployment is a separate deliberate installer action.
 

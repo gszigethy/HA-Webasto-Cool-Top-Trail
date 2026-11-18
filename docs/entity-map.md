@@ -1,6 +1,6 @@
 # Home Assistant entity reference
 
-These entities are implemented in version 1.0.0 beta 1. Example IDs assume entry name
+These entities are implemented since version 1.0.0 and tested on the appliance. Example IDs assume entry name
 **Caravan AC** and no naming collisions; actual IDs come from the entity registry.
 All eight entities share one Webasto Cool Top Trail device. IDs/unique IDs survive
 reloads and entry-title changes; creating another entry gives it independent identity.
@@ -54,7 +54,7 @@ that duplicates ON/OFF/both combinations. Sleep uses the standard climate preset
 Sources: [HA climate entity guidelines](https://developers.home-assistant.io/docs/core/entity/climate/),
 [HA time entity](https://developers.home-assistant.io/docs/core/entity/time/),
 [manufacturer manual §§5.5–5.17](https://varadicaravan.hu/wp-content/uploads/2022/04/Webasto-Cool-Top-Trail-20_24.pdf)
-and local labelled captures. These source mappings do not assert appliance tests.
+and local labelled captures. Appliance results are in [validation](validation.md).
 
 ## Service examples
 

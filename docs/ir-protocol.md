@@ -4,7 +4,7 @@ Status: **baseline and controlled live captures identify `CARRIER_AC128`**.
 The production HA/ESPHome implementation constructs complete frames from these
 findings. All 31 baseline packets decode to 16 bytes and pass both checksums;
 live MVP and auxiliary captures extend the field evidence. Synthesized commands
-have not yet been physically tested against the AC. See [validation](validation.md).
+were accepted by the physical AC on 2026-11-18. See [validation](validation.md).
 
 The first [live ON/OFF pair](../captures/live/2026-10-13-on-off/README.md) also
 matches: the user confirmed 22 C, cooling, auto fan, followed by a second power
@@ -174,9 +174,9 @@ See [technical design](technical-design.md) for mutation rules and transport.
 ## Remaining evidence gaps
 
 MVP modes/fans/power and auxiliary flags/timers are now locally corroborated.
-Further work: full-range physical verification, unknown byte 7 bit 3,
-counter behavior, additional remote/model variants, exact clock-edit send trigger,
-and optical/appliance acceptance of synthesized commands. Repeated rapid commands
+Synthesized commands for every control were accepted by the AC on 2026-11-18.
+Further work: unknown byte 7 bit 3, counter behavior, additional remote/model
+variants and the exact clock-edit send trigger. Repeated rapid commands
 and distinct higher timer digits would broaden the timing/BCD evidence.
 See [validation](validation.md). No measured room temperature, compressor action,
 or appliance acknowledgment is established by this command stream.
@@ -199,7 +199,7 @@ reconstruct every one of the 31 baseline payloads by changing mode, setpoint,
 and clock and recalculating both checksums. `encode_pulses` produces a complete
 nominal waveform that decodes back to those payloads. Auxiliary bytes are
 preserved. Fahrenheit and additional modes are explicitly outside this builder's
-current validation boundary. No generated command has been sent to an appliance.
+current validation boundary. The production codec below is the one tested on the appliance.
 
 `scripts/capture_ir_serial.py` assembles wrapped ESPHome raw log lines into
 timestamped JSONL records, preserving short/noisy frames even when decoding
@@ -219,7 +219,8 @@ Timer times remain stored when disabled. SET TIME and HOUR/MIN navigate local
 editing; no complete IR packet was observed for navigation alone. Value edits
 produced full-state packets, but the exact send trigger is not yet isolated.
 These newer captures supersede the baseline-only evidence column above for
-auxiliary fields. Air-conditioner responses are not yet physically verified.
+auxiliary fields. The air conditioner accepted HA-generated auxiliary commands
+(display, lock, Sleep, timers) on 2026-11-18.
 
 ## Production implementation
 
