@@ -27,9 +27,9 @@ checks on the current commit.
 ## Physical acceptance test (passed 2026-11-18)
 
 The owner tested every control of integration 1.0.6 on a real Webasto Cool Top
-Trail air conditioner, through an ESP32 (M5Stack Atom, IR LED on GPIO26, IR
-receiver on GPIO32) running `esp32/example.yaml`. The handheld remote was kept
-at hand to compare. All checks passed.
+Trail air conditioner, through a KinCony ESP32 board (`esp32dev`, IR LED on
+GPIO2, IR receiver on GPIO23) running the `esp32/example.yaml` bridge on ESPHome
+2026.10.1. The handheld remote was kept at hand to compare. All checks passed.
 
 | Check | Result |
 | --- | --- |
