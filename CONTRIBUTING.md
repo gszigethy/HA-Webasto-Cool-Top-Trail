@@ -25,7 +25,7 @@ physical appliance claims additionally require recorded acceptance tests.
 
 ## Releases
 
-Published releases are listed on GitHub; HACS installs them by tag. For a new
+Published releases are listed on GitHub; the Marketplace and HACS install them by tag. For a new
 release:
 
 1. Update `manifest.json` and `pyproject.toml` to the same version.
@@ -34,5 +34,5 @@ release:
 4. Publish a GitHub release with a matching `v<version>` tag; mark experimental
    builds as prereleases.
 
-HACS will download the integration directory from the repository. ZIP assets
+The Marketplace and HACS download the integration directory from the repository. ZIP assets
 are not required by the current `hacs.json` configuration.

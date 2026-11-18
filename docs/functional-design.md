@@ -7,10 +7,10 @@ Assistant through ESPHome infrared hardware. Replace the prototype's fixed
 recordings with complete state construction. The local remote-capture corpus
 identifies CARRIER_AC128, verifies its framing/checksums, and corroborates all
 five operating modes, four fan codes, power, temperature, panel flags, Sleep,
-clock and timer fields. The supplied manual is for 20/24; exact installed model
-and physical synthesized-command acceptance remain unverified.
+clock and timer fields. The supplied manual is for 20/24. Synthesized commands for every control were
+accepted by a physical unit on 2026-11-18.
 
-Provide HACS-installable HA configuration through the UI. Keep hardware secrets
+Provide Marketplace/HACS-installable HA configuration through the UI. Keep hardware secrets
 and Wi-Fi/API transport with built-in ESPHome. Run entirely locally. No vendor
 cloud, broker, HTTP server, background command replay or HA YAML helpers.
 
@@ -98,7 +98,7 @@ Changing time leaves its enable unchanged. Disabling leaves the stored time
 unchanged. Both timers can be enabled. Every explicit HA send refreshes the
 appliance clock; there is no autonomous schedule runner or periodic clock send.
 The combined ON/OFF mode is described as daily recurring by manual §5.12.
-Standalone ON/OFF execution details must be verified on the appliance.
+Standalone ON/OFF timer execution was tested on the appliance.
 
 The physical TIMER selector cycles ON → OFF → both → neither while blinking.
 After ten seconds the remote returns to clock display with any enabled ON/OFF
@@ -111,8 +111,7 @@ Value edits produced full-state IR packets. Their precise transmit trigger
 
 The repo implementation is complete for the documented Celsius and Fahrenheit control profiles
 and locally confirmed auxiliary fields. Static/isolated tests and firmware
-builds validate software behavior. [Appliance acceptance](validation.md) is a
-separate deployment step: no live HA configuration or firmware deployment is
-performed by development. Broader model support, full-range physical verification,
+builds validate software behavior, and every control passed
+[appliance acceptance](validation.md) on 2026-11-18. Broader model support,
 unknown flag/counter interpretation and actual appliance telemetry are future
 work requiring new evidence.
