@@ -1,10 +1,26 @@
+<!-- ha-marketplace:exclude-start -->
+<img align="right" width="110" src="custom_components/webasto_cool_top_trail/brand/icon@2x.png" alt="Webasto Cool Top Trail icon">
+<!-- ha-marketplace:exclude-end -->
+
 # Webasto Cool Top Trail for Home Assistant
 
-Control a **Webasto Cool Top Trail** caravan or motorhome air conditioner from Home Assistant, the same way the handheld remote does.
+<!-- ha-marketplace:exclude-start -->
+[![CI](https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail/actions/workflows/ci.yml/badge.svg)](https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail/actions/workflows/ci.yml)
+[![Validate](https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail/actions/workflows/validate.yml/badge.svg)](https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail/actions/workflows/validate.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=gszigethy_HA-Webasto-Cool-Top-Trail&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=gszigethy_HA-Webasto-Cool-Top-Trail)
+[![Latest release](https://img.shields.io/github/v/release/gszigethy/HA-Webasto-Cool-Top-Trail)](https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail/releases/latest)
+[![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz)
+[![Home Assistant 2026.10.1+](https://img.shields.io/badge/Home%20Assistant-2026.10.1%2B-blue)](https://www.home-assistant.io)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+<!-- ha-marketplace:exclude-end -->
 
-Every control has been tested on a real Webasto Cool Top Trail air conditioner. See [testing status](docs/validation.md).
+> **Control your Webasto Cool Top Trail caravan or motorhome air conditioner from Home Assistant, the same way the handheld remote does.**
 
-## How it works
+✅ **Tested on a real air conditioner.** Every control works. See the [testing status](docs/validation.md).
+
+🏠 **Fully local.** No cloud, no account, no pairing, no button learning.
+
+## ⚙️ How it works
 
 ```text
 Home Assistant  ──Wi-Fi──▶  ESP32  ──infrared──▶  air conditioner
@@ -12,24 +28,24 @@ Home Assistant  ──Wi-Fi──▶  ESP32  ──infrared──▶  air condit
              handheld remote ─┘ (optional IR receiver)
 ```
 
-- An **ESP32** with an **infrared (IR) LED** acts as the remote control. You set it up with ESPHome.
-- This **integration** (installed from the Home Assistant Marketplace) adds the air-conditioner controls to Home Assistant and tells the ESP32 what to send.
-- An optional **IR receiver** on the ESP32 lets Home Assistant follow presses on the handheld remote.
+| Part | Job |
+| --- | --- |
+| 📡 **ESP32** with an **infrared (IR) LED** | Acts as the remote control. You set it up with ESPHome. |
+| 🧩 **This integration** | Adds the air-conditioner controls to Home Assistant and tells the ESP32 what to send. |
+| 👁️ **IR receiver** (optional) | Lets Home Assistant follow presses on the handheld remote. |
 
-Everything runs locally: no cloud and no account. There is no pairing and no button learning.
-
-## What you get
+## ✨ What you get
 
 | Control | What it does |
 | --- | --- |
-| Climate | Off, cool, heat, auto (heat/cool), dry, fan only; temperature in °C or °F; fan speed; Sleep |
-| Panel display, Panel control lock | Switch the AC's display off, lock its buttons |
-| On timer, Off timer, On time, Off time | The AC's own daily timers |
-| Protocol status | Shows whether the ESP32 is connected and ready |
+| 🌡️ **Climate** | Off, cool, heat, auto (heat/cool), dry, fan only. Temperature in °C or °F, fan speed, Sleep. |
+| 🔒 **Panel display, Panel control lock** | Switch the AC's display off, lock its buttons. |
+| ⏰ **On timer, Off timer, On time, Off time** | The AC's own daily timers. |
+| 🔌 **Protocol status** | Shows whether the ESP32 is connected and ready. |
 
-Infrared only goes one way. The AC never reports back, so Home Assistant shows the settings it last sent, not confirmed AC status.
+> **Note:** Infrared only goes one way. The AC never reports back, so Home Assistant shows the settings it last sent, not confirmed AC status.
 
-## What you need
+## 🧰 What you need
 
 - **Home Assistant** 2026.10.1 or newer. From 2026.11 the **Marketplace** is built in; on 2026.10 you need **[HACS](https://hacs.xyz/)**.
 - **ESPHome** 2026.9.1 or newer, for example the ESPHome Device Builder add-on in Home Assistant.
@@ -37,7 +53,9 @@ Infrared only goes one way. The AC never reports back, so Home Assistant shows t
 - Optional: an **IR receiver** on the same ESP32.
 - The GPIO pin numbers your transmitter (and receiver) are connected to.
 
-## Installation
+## 🚀 Installation
+
+Five steps: **ESP32 → add it to Home Assistant → install this integration → add the AC → first use.**
 
 ### Step 1: Set up the ESP32
 
@@ -206,15 +224,15 @@ The controls are available right away, with or without a receiver. They start fr
 
 With a receiver, whenever someone uses the handheld remote, Home Assistant picks up the remote's settings automatically.
 
-Now try turning the AC on from Home Assistant and check that the AC responds.
+🎉 Now try turning the AC on from Home Assistant and check that the AC responds.
 
-## Good to know
+## 💡 Good to know
 
 - Every command sends **all** the AC's settings at once and sets the AC's clock. If someone uses the handheld remote and Home Assistant doesn't hear it, the next command from Home Assistant overwrites that change.
 - Home Assistant doesn't see the AC's own timers switching it on or off.
 - The ESP32 keeps working when Home Assistant is unreachable; it simply waits for the next command.
 
-## Troubleshooting
+## 🔧 Troubleshooting
 
 | Problem | What to check |
 | --- | --- |
@@ -224,7 +242,7 @@ Now try turning the AC on from Home Assistant and check that the AC responds.
 
 More help: [installation guide](docs/installation.md#if-something-does-not-work).
 
-## More information
+## 📚 More information
 
 - [Detailed installation and everyday use](docs/installation.md)
 - [Entities and automation examples](docs/entity-map.md)
@@ -233,7 +251,7 @@ More help: [installation guide](docs/installation.md#if-something-does-not-work)
 - [Testing status](docs/validation.md) · [Contributing](CONTRIBUTING.md) · [Changelog](CHANGELOG.md)
 - [Manufacturer's manual (Hungarian)](https://varadicaravan.hu/wp-content/uploads/2022/04/Webasto-Cool-Top-Trail-20_24.pdf)
 
-## Credits
+## 🙏 Credits
 
 - **[IRremoteESP8266](https://github.com/crankyoldgit/IRremoteESP8266)** by [@crankyoldgit](https://github.com/crankyoldgit) and contributors: the `CARRIER_AC128` protocol and its wire timings, which identified this remote's signal.
 - **[@mrmees](https://github.com/mrmees)**: the [esphome-houghton-ac](https://github.com/mrmees/esphome-houghton-ac) project and its byte-level analysis of the Houghton protocol ([#2009](https://github.com/crankyoldgit/IRremoteESP8266/issues/2009), [#2247](https://github.com/crankyoldgit/IRremoteESP8266/issues/2247)), the main field-map reference.
