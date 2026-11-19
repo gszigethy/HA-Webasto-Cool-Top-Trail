@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Climate entity: uses the `native_temperature_unit`, `native_target_temperature` and `native_current_temperature` properties from Home Assistant 2026.11. This removes the deprecation warnings in the log. Older Home Assistant versions (from 2026.10.1) still work.
+
 ## 1.1.3 — 2026-11-19
 
 - HACS and the Home Assistant Marketplace now install from the `webasto_cool_top_trail.zip` release asset (`zip_release` in `hacs.json`), so installs and updates show up in the download count.

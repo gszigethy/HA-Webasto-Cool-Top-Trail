@@ -37,7 +37,7 @@ class WebastoClimate(WebastoEntity, ClimateEntity):
         super().__init__(bridge, "climate")
 
     @property
-    def temperature_unit(self):
+    def native_temperature_unit(self):
         return (
             UnitOfTemperature.FAHRENHEIT
             if self.bridge.state.get("remote_temperature_unit") == "F"
@@ -46,11 +46,15 @@ class WebastoClimate(WebastoEntity, ClimateEntity):
 
     @property
     def min_temp(self):
-        return 60 if self.temperature_unit == UnitOfTemperature.FAHRENHEIT else 16
+        return (
+            60 if self.native_temperature_unit == UnitOfTemperature.FAHRENHEIT else 16
+        )
 
     @property
     def max_temp(self):
-        return 86 if self.temperature_unit == UnitOfTemperature.FAHRENHEIT else 30
+        return (
+            86 if self.native_temperature_unit == UnitOfTemperature.FAHRENHEIT else 30
+        )
 
     @property
     def supported_features(self):
@@ -70,17 +74,17 @@ class WebastoClimate(WebastoEntity, ClimateEntity):
         return HVACMode(mode) if mode else None
 
     @property
-    def target_temperature(self):
+    def native_target_temperature(self):
         if self.hvac_mode == HVACMode.FAN_ONLY:
             return None
         return self.bridge.state.get(
             "target_temperature_f"
-            if self.temperature_unit == UnitOfTemperature.FAHRENHEIT
+            if self.native_temperature_unit == UnitOfTemperature.FAHRENHEIT
             else "target_temperature_c"
         )
 
     @property
-    def current_temperature(self):
+    def native_current_temperature(self):
         sensor = self.bridge.entry.data.get(CONF_TEMPERATURE_SENSOR)
         state = self.hass.states.get(sensor) if sensor else None
         if state is None:
@@ -93,9 +97,17 @@ class WebastoClimate(WebastoEntity, ClimateEntity):
                 UnitOfTemperature.FAHRENHEIT,
             ):
                 return None
-            return TemperatureConverter.convert(value, unit, self.temperature_unit)
+            return TemperatureConverter.convert(
+                value, unit, self.native_temperature_unit
+            )
         except ValueError, TypeError:
             return None
+
+    if not hasattr(ClimateEntity, "native_temperature_unit"):
+        # Home Assistant before 2026.11 reads the old property names.
+        temperature_unit = native_temperature_unit
+        target_temperature = native_target_temperature
+        current_temperature = native_current_temperature
 
     @property
     def fan_mode(self):
@@ -128,12 +140,12 @@ class WebastoClimate(WebastoEntity, ClimateEntity):
         if not math.isfinite(value) or not self.min_temp <= value <= self.max_temp:
             raise HomeAssistantError(
                 f"Temperature must be between {self.min_temp} and "
-                f"{self.max_temp} {self.temperature_unit}"
+                f"{self.max_temp} {self.native_temperature_unit}"
             )
         # HA converts display units to the current remote profile before this call.
         field = (
             "temperature_f"
-            if self.temperature_unit == UnitOfTemperature.FAHRENHEIT
+            if self.native_temperature_unit == UnitOfTemperature.FAHRENHEIT
             else "temperature"
         )
         changes = {field: math.floor(value + 0.5)}
