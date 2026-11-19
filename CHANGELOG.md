@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.1 — 2026-11-19
+
+- README: added GitHub badges (CI, validation, quality gate, release, HACS, Home Assistant version, license).
+- README: new look with the integration icon, a short tagline, tables and section icons. The badges and icon show on GitHub only, not in the Marketplace.
+- Documentation-only maintenance release with no integration or firmware behavior changes.
+
 ## 1.1.0 — 2026-11-18
 
 Production ready: every control is now tested on a real air conditioner.
