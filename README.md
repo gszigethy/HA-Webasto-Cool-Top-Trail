@@ -1,20 +1,24 @@
 <!-- ha-marketplace:exclude-start -->
-<img align="right" width="110" src="custom_components/webasto_cool_top_trail/brand/icon@2x.png" alt="Webasto Cool Top Trail icon">
+<p align="center">
+  <img width="120" src="custom_components/webasto_cool_top_trail/brand/icon@2x.png" alt="Webasto Cool Top Trail icon">
+</p>
 <!-- ha-marketplace:exclude-end -->
 
-# Webasto Cool Top Trail for Home Assistant
+<h1 align="center">Webasto Cool Top Trail for Home Assistant</h1>
 
 <!-- ha-marketplace:exclude-start -->
-[![CI](https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail/actions/workflows/ci.yml/badge.svg)](https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail/actions/workflows/ci.yml)
-[![Validate](https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail/actions/workflows/validate.yml/badge.svg)](https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail/actions/workflows/validate.yml)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=gszigethy_HA-Webasto-Cool-Top-Trail&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=gszigethy_HA-Webasto-Cool-Top-Trail)
-[![Latest release](https://img.shields.io/github/v/release/gszigethy/HA-Webasto-Cool-Top-Trail)](https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail/releases/latest)
-[![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz)
-[![Home Assistant 2026.10.1+](https://img.shields.io/badge/Home%20Assistant-2026.10.1%2B-blue)](https://www.home-assistant.io)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+<p align="center">
+  <a href="https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail/actions/workflows/validate.yml"><img alt="Validate" src="https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail/actions/workflows/validate.yml/badge.svg"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=gszigethy_HA-Webasto-Cool-Top-Trail"><img alt="Quality Gate Status" src="https://sonarcloud.io/api/project_badges/measure?project=gszigethy_HA-Webasto-Cool-Top-Trail&metric=alert_status"></a>
+  <a href="https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/gszigethy/HA-Webasto-Cool-Top-Trail"></a>
+  <a href="https://hacs.xyz"><img alt="HACS Custom" src="https://img.shields.io/badge/HACS-Custom-orange.svg"></a>
+  <a href="https://www.home-assistant.io"><img alt="Home Assistant 2026.10.1+" src="https://img.shields.io/badge/Home%20Assistant-2026.10.1%2B-blue"></a>
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-green.svg"></a>
+</p>
 <!-- ha-marketplace:exclude-end -->
 
-> **Control your Webasto Cool Top Trail caravan or motorhome air conditioner from Home Assistant, the same way the handheld remote does.**
+<p align="center"><strong>Control your Webasto Cool Top Trail caravan or motorhome air conditioner from Home Assistant,<br>the same way the handheld remote does.</strong></p>
 
 ✅ **Tested on a real air conditioner.** Every control works. See the [testing status](docs/validation.md).
 
