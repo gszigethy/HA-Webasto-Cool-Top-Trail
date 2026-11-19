@@ -1,5 +1,15 @@
 # Webasto Cool Top Trail for Home Assistant
 
+<!-- ha-marketplace:exclude-start -->
+[![CI](https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail/actions/workflows/ci.yml/badge.svg)](https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail/actions/workflows/ci.yml)
+[![Validate](https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail/actions/workflows/validate.yml/badge.svg)](https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail/actions/workflows/validate.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=gszigethy_HA-Webasto-Cool-Top-Trail&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=gszigethy_HA-Webasto-Cool-Top-Trail)
+[![Latest release](https://img.shields.io/github/v/release/gszigethy/HA-Webasto-Cool-Top-Trail)](https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail/releases/latest)
+[![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz)
+[![Home Assistant 2026.10.1+](https://img.shields.io/badge/Home%20Assistant-2026.10.1%2B-blue)](https://www.home-assistant.io)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+<!-- ha-marketplace:exclude-end -->
+
 Control a **Webasto Cool Top Trail** caravan or motorhome air conditioner from Home Assistant, the same way the handheld remote does.
 
 Every control has been tested on a real Webasto Cool Top Trail air conditioner. See [testing status](docs/validation.md).
