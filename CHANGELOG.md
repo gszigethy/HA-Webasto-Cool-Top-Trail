@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.2 — 2026-11-19
+
+- README: the logo, title, badges and tagline are now centered. The logo and badges show on GitHub only, not in the Marketplace.
+- Documentation-only maintenance release with no integration or firmware behavior changes.
+
 ## 1.1.1 — 2026-11-19
 
 - README: added GitHub badges (CI, validation, quality gate, release, HACS, Home Assistant version, license).
