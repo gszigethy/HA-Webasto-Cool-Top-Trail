@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.3 — 2026-11-19
+
+- HACS and the Home Assistant Marketplace now install from the `webasto_cool_top_trail.zip` release asset (`zip_release` in `hacs.json`), so installs and updates show up in the download count.
+- A new release workflow builds that ZIP, checks it, and attaches it to every published release.
+- Maintenance release with no integration or firmware behavior changes.
+
 ## 1.1.2 — 2026-11-19
 
 - README: the logo, title, badges and tagline are now centered. The logo and badges show on GitHub only, not in the Marketplace.
