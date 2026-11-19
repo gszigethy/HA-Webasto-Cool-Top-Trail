@@ -1,5 +1,7 @@
 {
   "name": "HA Webasto Cool Top Trail",
   "homeassistant": "2026.10.1",
-  "render_readme": true
+  "render_readme": true,
+  "zip_release": true,
+  "filename": "webasto_cool_top_trail.zip"
 }
