@@ -3,7 +3,7 @@
 ## 1.1.4 — 2026-11-23
 
 - The integration is now in the default HACS store and the Home Assistant Marketplace. No custom repository is needed.
-- README: "Open in the Marketplace", "Open in HACS" and "Add integration" buttons, a "HACS Default" badge, and a link bar under the badges. Shorter install steps.
+- README: "Open in the Marketplace" and "Add integration" buttons, a "HACS Default" badge, and a link bar under the badges. Shorter install steps.
 - Climate entity: uses the `native_temperature_unit`, `native_target_temperature` and `native_current_temperature` properties from Home Assistant 2026.11. This removes the deprecation warnings in the log. Older Home Assistant versions (from 2026.10.1) still work.
 
 ## 1.1.3 — 2026-11-19
