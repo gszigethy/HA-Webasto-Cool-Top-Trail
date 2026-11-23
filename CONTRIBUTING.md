@@ -34,5 +34,6 @@ release:
 4. Publish a GitHub release with a matching `v<version>` tag; mark experimental
    builds as prereleases.
 
-The Marketplace and HACS download the integration directory from the repository. ZIP assets
-are not required by the current `hacs.json` configuration.
+The Marketplace and HACS install the `webasto_cool_top_trail.zip` release asset
+(`zip_release` in `hacs.json`). The release workflow builds and attaches it after the release
+is published; check that the asset is there.

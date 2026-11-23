@@ -12,9 +12,23 @@
   <a href="https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail/actions/workflows/validate.yml"><img alt="Validate" src="https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail/actions/workflows/validate.yml/badge.svg"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=gszigethy_HA-Webasto-Cool-Top-Trail"><img alt="Quality Gate Status" src="https://sonarcloud.io/api/project_badges/measure?project=gszigethy_HA-Webasto-Cool-Top-Trail&metric=alert_status"></a>
   <a href="https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/gszigethy/HA-Webasto-Cool-Top-Trail"></a>
-  <a href="https://hacs.xyz"><img alt="HACS Custom" src="https://img.shields.io/badge/HACS-Custom-orange.svg"></a>
+  <a href="https://hacs.xyz"><img alt="HACS Default" src="https://img.shields.io/badge/HACS-Default-41BDF5.svg"></a>
   <a href="https://www.home-assistant.io"><img alt="Home Assistant 2026.10.1+" src="https://img.shields.io/badge/Home%20Assistant-2026.10.1%2B-blue"></a>
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-green.svg"></a>
+</p>
+
+<p align="center">
+  <a href="https://my.home-assistant.io/redirect/marketplace_repository/?owner=gszigethy&repository=HA-Webasto-Cool-Top-Trail&category=integration"><img alt="Open in the Marketplace" src="https://my.home-assistant.io/badges/marketplace_repository.svg"></a>
+  <a href="https://my.home-assistant.io/redirect/hacs_repository/?owner=gszigethy&repository=HA-Webasto-Cool-Top-Trail&category=integration"><img alt="Open in HACS" src="https://my.home-assistant.io/badges/hacs_repository.svg"></a>
+  <a href="https://my.home-assistant.io/redirect/config_flow_start/?domain=webasto_cool_top_trail"><img alt="Add integration" src="https://my.home-assistant.io/badges/config_flow_start.svg"></a>
+</p>
+
+<p align="center">
+  <a href="#️-how-it-works">How it works</a> ·
+  <a href="#-what-you-need">What you need</a> ·
+  <a href="#-installation">Installation</a> ·
+  <a href="#-troubleshooting">Troubleshooting</a> ·
+  <a href="#-more-information">More information</a>
 </p>
 <!-- ha-marketplace:exclude-end -->
 
@@ -202,21 +216,30 @@ Go to **Settings → Devices & services**. The ESP32 usually appears as a discov
 Download **Webasto Cool Top Trail** from the Marketplace (or HACS), then **restart Home Assistant**.
 
 <!-- ha-marketplace:exclude-start -->
+The integration is in the default Marketplace and HACS store, so you don't need to add a custom repository.
+
 Home Assistant 2026.11 or newer:
 
-1. Open **Settings → Marketplace** and search for **Webasto Cool Top Trail**. If it is not listed, add it from a link: `https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail`.
+[![Open in the Marketplace](https://my.home-assistant.io/badges/marketplace_repository.svg)](https://my.home-assistant.io/redirect/marketplace_repository/?owner=gszigethy&repository=HA-Webasto-Cool-Top-Trail&category=integration)
+
+1. Click the button above, or open **Settings → Marketplace** and search for **Webasto Cool Top Trail**.
 2. Download it and **restart Home Assistant**.
 
 Home Assistant 2026.10 with HACS:
 
-1. Open **HACS → ⋮ → Custom repositories**.
-2. Add `https://github.com/gszigethy/HA-Webasto-Cool-Top-Trail` with type **Integration**.
-3. Search for **Webasto Cool Top Trail** in HACS, download it, and **restart Home Assistant**.
+[![Open in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=gszigethy&repository=HA-Webasto-Cool-Top-Trail&category=integration)
+
+1. Click the button above, or open **HACS** and search for **Webasto Cool Top Trail**.
+2. Download it and **restart Home Assistant**.
 <!-- ha-marketplace:exclude-end -->
 
 ### Step 4: Add the air conditioner
 
-Go to **Settings → Devices & services → Add integration → Webasto Cool Top Trail** and fill in:
+<!-- ha-marketplace:exclude-start -->
+[![Add integration](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=webasto_cool_top_trail)
+<!-- ha-marketplace:exclude-end -->
+
+Click the button above, or go to **Settings → Devices & services → Add integration → Webasto Cool Top Trail**, and fill in:
 
 - **Name:** for example "Caravan AC".
 - **ESPHome IR bridge:** the ESP32 from step 2.
