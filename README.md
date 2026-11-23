@@ -19,7 +19,6 @@
 
 <p align="center">
   <a href="https://my.home-assistant.io/redirect/marketplace_repository/?owner=gszigethy&repository=HA-Webasto-Cool-Top-Trail&category=integration"><img alt="Open in the Marketplace" src="https://my.home-assistant.io/badges/marketplace_repository.svg"></a>
-  <a href="https://my.home-assistant.io/redirect/hacs_repository/?owner=gszigethy&repository=HA-Webasto-Cool-Top-Trail&category=integration"><img alt="Open in HACS" src="https://my.home-assistant.io/badges/hacs_repository.svg"></a>
   <a href="https://my.home-assistant.io/redirect/config_flow_start/?domain=webasto_cool_top_trail"><img alt="Add integration" src="https://my.home-assistant.io/badges/config_flow_start.svg"></a>
 </p>
 
@@ -227,9 +226,7 @@ Home Assistant 2026.11 or newer:
 
 Home Assistant 2026.10 with HACS:
 
-[![Open in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=gszigethy&repository=HA-Webasto-Cool-Top-Trail&category=integration)
-
-1. Click the button above, or open **HACS** and search for **Webasto Cool Top Trail**.
+1. Open **HACS** and search for **Webasto Cool Top Trail**.
 2. Download it and **restart Home Assistant**.
 <!-- ha-marketplace:exclude-end -->
 
